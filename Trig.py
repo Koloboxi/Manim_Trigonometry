@@ -225,8 +225,8 @@ class PythagoreanTheorem(Scene):
 
 
 ##UNIT CIRCLE
-config.frame_width = 3.555
-config.frame_height = 2
+# config.frame_width = 3.555
+# config.frame_height = 2
 
 class UnitCircle(MovingCameraScene):
     def construct(self):
@@ -480,3 +480,49 @@ class UnitCircle(MovingCameraScene):
         
         self.play(self.camera.frame.animate.shift([0,-4,0]).set(width=6.5))
 
+
+class NormalVector1(MovingCameraScene):
+    def construct(self):
+        block = Rectangle(color=WHITE, height=1, width=5)
+        self.play(Create(block))
+        self.play(block.animate.shift([0, -2, 0]))
+
+        force_vector = Arrow(block.get_center()+[-5,0.5,0], block.get_center()+[0,0.5,0], buff=0, tip_shape=StealthTip).rotate(-30*DEGREES, about_point=block.get_center()+[0,0.5,0])
+        normal_vector = Arrow([0, 1, 0], [0, -1.5, 0], buff=0, tip_shape=StealthTip)
+        parallel_vector = Arrow(force_vector.get_all_points()[0], [0, 1, 0], buff=0, tip_shape=StealthTip)
+
+        self.play(Create(force_vector))
+        self.wait(0.6)
+
+
+        horizontal_axes = DashedLine([-np.cos(30*DEGREES)*5, 1, 0], [0, 1, 0], stroke_width=3)
+        degrees_label = MathTex(r'30^{\circ}').next_to([-3, 1, 0], DOWN*0.8+RIGHT*0.8)
+        force_label = MathTex(r'\vec{F} = 10H').next_to(force_vector.get_center(), LEFT+DOWN*0.6)
+        normal_label_q = MathTex("x").next_to([0,0,0], RIGHT).scale(1.3)
+        triangle_highlight = Polygon(force_vector.get_all_points()[0], [0, 1, 0], [0, -1.5, 0], color=YELLOW, stroke_width=10).set_z_index(2)
+
+        self.play(Create(horizontal_axes), Write(degrees_label))
+        self.play(Write(force_label))
+        self.wait(1)
+        self.play(Create(normal_vector), Write(normal_label_q))
+        self.play(Indicate(normal_label_q))
+        self.wait(1.5)
+        self.play(Create(triangle_highlight))
+        self.play(Uncreate(triangle_highlight))
+        self.wait(1)
+        self.play(Indicate(normal_label_q))
+        self.wait(0.7)
+        self.play(Indicate(degrees_label))
+        self.wait(2.5)
+    
+        eqution = MathTex(r"sin30^\circ = \frac{x}{\vec{F}}", r"=\frac{1}{2}").move_to([-4, 2, 0])
+        equation_value = MathTex(r"x = \frac{\vec{F}}{2} = 5H").move_to([0, 2.2, 0])
+        self.play(Write(eqution[0]), run_time=2)
+        self.wait(1.5)
+        self.play(Write(eqution[1]))
+        self.wait(2.5)
+        self.play(Transform(eqution, equation_value))
+        self.wait(1)
+        self.play(Circumscribe(equation_value), run_time=2)
+        self.wait(1)
+        self.play(self.camera.frame.animate.shift([10,0,0]))
