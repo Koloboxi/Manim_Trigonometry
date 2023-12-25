@@ -526,3 +526,40 @@ class NormalVector1(MovingCameraScene):
         self.play(Circumscribe(equation_value), run_time=2)
         self.wait(1)
         self.play(self.camera.frame.animate.shift([10,0,0]))
+
+
+
+class NormalVector2(MovingCameraScene):
+    def construct(self):
+        rays = VGroup(
+            Line([0, 3, 0], [10, 3, 0], color=YELLOW, stroke_width=2),
+            Line([1.5, np.cos(30*DEGREES)*3, 0], [10, np.cos(30*DEGREES)*3, 0], color=YELLOW, stroke_width=2),
+            Line([np.cos(30*DEGREES)*3, 1.5, 0], [10, 1.5, 0], color=YELLOW, stroke_width=2),
+            Line([3, 0, 0], [10, 0, 0], color=YELLOW, stroke_width=2)
+        )
+        earth = VGroup(
+            Circle(radius=3, color=LIGHT_BROWN, fill_opacity=0.2),
+            DashedLine([-3, 0, 0], [3, 0, 0], dash_length=0.5, color=BLUE),
+            rays, rays.copy().flip(RIGHT).shift([0, -3, 0])
+        )
+        equator_right_angle = VGroup(
+            Square(side_length=0.25, color=RED).set_z_index(-2).move_to([3, 0, 0], DOWN+LEFT),
+            Dot([3.125, 0.125, 0], color=RED, radius=0.03)
+        )
+        tan0 = Line([3, 1.2, 0], [3, -1.2, 0])
+        tan30 = Line([2, 2.54, 0], [3.2, 0.46, 0])
+        tan60 = Line([0.46, 3.2, 0], [3, -1.2, 0])
+        tan90 = Line([-1.2, 3, 0], [2.54, 2, 0])
+
+        self.play(DrawBorderThenFill(earth[0]), Create(earth[1]), run_time=1.5)
+        self.play(Create(earth[2]), Create(earth[3]), run_time=1)
+        self.play(self.camera.frame.animate.shift([3, 0, 0]))
+        self.wait(5)
+        self.play(Create(tan0))
+        self.wait(2)
+        self.play(Create(equator_right_angle))
+        self.wait(2)
+        self.play(Transform(tan0, tan30), Uncreate(equator_right_angle))
+        self.wait(1)
+        self.play(self.camera.frame.animate.move_to([3.2, 1.5, 0]).set(height=4))
+        self.wait(2)
