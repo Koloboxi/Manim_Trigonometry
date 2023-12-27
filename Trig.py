@@ -550,7 +550,7 @@ class NormalVector2(MovingCameraScene):
         tan0 = Line([3, 1.2, 0], [3, -1.2, 0])
         tan30 = Line([2, 2.54, 0], [3.2, 0.46, 0])
         tan60 = Line([0.46, 3.2, 0], [2.54, 2, 0])
-        tan90 = Line([-1.2, 3, 0], [2.54, 2, 0])
+        tan90 = Line([-1.2, 3, 0], [1.2, 3, 0])
 
         cos0 = Tex('1').next_to([3, 0, 0], LEFT+UP)
         cos30 = Tex('0.87').next_to([0.87*3, 1.5, 0], LEFT)
@@ -574,8 +574,9 @@ class NormalVector2(MovingCameraScene):
         normal60 = Arrow([3.8, 2.6, 0], [3.23, 1.6, 0], max_tip_length_to_length_ratio=0.1, tip_shape=StealthTip, stroke_width=2.5, buff=0)
         x2 = MathTex('x').scale(0.6).move_to(normal60.get_center() + RIGHT*0.1+DOWN*0.1)
         equation60 = MathTex(r'x = sin30^\circ = \frac{1}{2}').move_to([1.5, 3.7, 0]).scale(0.6)
-
         equation45 = MathTex(r'x = sin45^\circ \approx 0.7').move_to([1.5, 3.7, 0]).scale(0.6)
+
+        general_equation = MathTex(r'x',  '= sin', r'\theta', r'= cos(', r'90^\circ - \theta', r')').move_to([-7, 0, 0])
 
         self.play(DrawBorderThenFill(earth[0]), Create(earth[1]), run_time=1.5)
         self.play(Create(earth[2]), Create(earth[3]), Create(earth[4]), run_time=1)
@@ -614,10 +615,162 @@ class NormalVector2(MovingCameraScene):
         self.play(Transform(VGroup(x2, angle60), equation60))
         self.wait(2)
         self.play(Circumscribe(equation60), run_time=2)
-        self.wait(1.5)
+        self.wait(0.5)
         self.play(Transform(VGroup(x2, angle60), equation45))
         self.wait(1)
-        self.play(Unwrite(VGroup(x2, angle60, parallel30)), Uncreate(VGroup(normal60, arc60)), run_time=1.5)
-
-        self.play(self.camera.frame.animate.move_to([2,1.5,0]).set_height(6))
+        self.play(Unwrite(VGroup(x2, angle60, parallel30)), Uncreate(VGroup(normal60, arc60)), self.camera.frame.animate.move_to([2,1.5,0]).set_height(6), tan0.animate.become(tan90), line30.animate.rotate(30*DEGREES, about_point=[0,0,0]), run_time=2.5)
         self.wait(1)
+
+        self.play(self.camera.frame.animate.move_to([-6, 0, 0]))
+        self.wait(0.5)
+        self.play(Write(general_equation))
+        self.wait(0.5)
+        self.play(Indicate(general_equation[0]))
+        self.wait(0.5)
+        self.play(Indicate(general_equation[2]))
+        self.wait(1)
+        self.play(Indicate(general_equation[4], scale_factor=1.1))
+        self.wait(1)
+        self.play(Circumscribe(general_equation))
+        self.wait(2)
+
+
+config.frame_width = 3.555
+config.frame_height = 2
+
+class Tangent(MovingCameraScene):
+    def construct(self):
+        circle = Circle(radius=1, color=GREEN, stroke_width=1).rotate(45*DEGREES).set_z_index(-2)
+        circle_point = Dot([0.7071, 0.7071, 0], color=WHITE, radius=0.01)
+
+        triangle = VGroup(
+            Line([0, 0, 0], circle_point.get_center(), color=YELLOW, stroke_width=1),
+            Line(circle_point.get_center(), [circle_point.get_x(), 0, 0], stroke_width=0.7),
+            Line([0, 0, 0], [circle_point.get_x(), 0, 0], stroke_width=0.7),
+            Square(side_length=0.07, color=RED, stroke_width=0.7)
+            .align_to(
+                [circle_point.get_x(), 0, 0], 
+                DOWN+RIGHT if circle_point.get_y() > 0  else UP+LEFT
+            ).set_z_index(-1)
+        )
+        triangle.add_updater(
+            lambda obj: obj.become(
+                VGroup(
+                    Line([0, 0, 0], circle_point.get_center(), color=YELLOW, stroke_width=1),
+                    Line(circle_point.get_center(), [circle_point.get_x(), 0, 0], stroke_width=0.7),
+                    Line([0, 0, 0], [circle_point.get_x(), 0, 0], stroke_width=0.7),
+                    Square(side_length=0.07, color=RED, stroke_width=0.7)
+                    .align_to(
+                        [circle_point.get_x(), 0, 0], 
+                        (DOWN+RIGHT if circle_point.get_x() > 0 else DOWN+LEFT) if circle_point.get_y() > 0  else (UP+LEFT if circle_point.get_x() < 0 else UP+RIGHT)
+                    ).set_z_index(-1),
+                )
+            )
+        )
+        radius = triangle[0]
+        opposite = triangle[1]
+        adjacent = triangle[2]
+        x_axis = Line([0,0,0], [1,0,0])
+        axes = Axes(x_length=2.4, y_length=2.4, x_range=[-1.2, 1.2], y_range=[-1.2, 1.2], tips=False, axis_config={'include_ticks': False}).set_stroke(width=0.6).set_z_index(-1)
+
+
+        unit = Tex("1").set(height=0.1).next_to(radius.get_center(), UP*0.1*np.cos(Angle(adjacent, radius).get_value()) + LEFT*0.1*np.sin(Angle(adjacent, radius).get_value()))
+        unit.add_updater(
+            lambda obj: obj.next_to(radius.get_center(), UP*0.1*np.cos(Angle(adjacent, radius).get_value()) + LEFT*0.1*np.sin(Angle(adjacent, radius).get_value()))
+        )
+               
+        theta_arc = Arc(radius=0.08, start_angle=0, angle=Angle(x_axis, radius).get_value(), color=RED, stroke_width=0.7)
+        theta_arc.add_updater(
+            lambda obj: obj.become(Arc(radius=0.08, start_angle=0, angle=Angle(x_axis, radius).get_value(), color=RED, stroke_width=0.7))
+        ) 
+        theta_letter = Tex(r"$\theta$").move_to([0.2*np.cos(Angle(x_axis, radius).get_value()/2), 0.2*np.sin(Angle(x_axis, radius).get_value()/2), 0]).scale(0.3)
+        theta_letter.add_updater(
+            lambda obj: obj.become(Tex(r"$\theta$").move_to([0.2*np.cos(Angle(x_axis, radius).get_value()/2), 0.2*np.sin(Angle(x_axis, radius).get_value()/2), 0])).scale(0.3)
+        )
+
+        inv_adjacent = DashedLine([0, circle_point.get_y(), 0], [circle_point.get_x(), circle_point.get_y(), 0], stroke_width=0.7)
+        inv_adjacent.add_updater(
+            lambda obj: obj.become(DashedLine([0, circle_point.get_y(), 0], [circle_point.get_x(), circle_point.get_y(), 0], stroke_width=0.7))
+        )
+        inv_opposite = Line([0,0,0], [0, circle_point.get_y(), 0], stroke_width=0.7)
+        inv_opposite.add_updater(
+            lambda obj: obj.become(Line([0,0,0], [0, circle_point.get_y(), 0], stroke_width=0.7))
+        )
+        
+        sin_axes_label = Tex(r"sin$\theta$").scale(0.3).next_to([0,1,0], LEFT*0.3+UP*0.2)
+        sin_value = DecimalNumber(circle_point.get_y(), num_decimal_places=2).scale(0.22)
+        sin_value.add_updater(
+            lambda obj: obj.set_value(circle_point.get_y()).next_to([0, circle_point.get_y() - 0.1, 0], LEFT*0.02)
+        )
+        cos_axes_label = Tex(r"cos$\theta$").scale(0.3).next_to([1,0,0], RIGHT*0.3+UP*0.2)
+        cos_value = DecimalNumber(circle_point.get_x(), num_decimal_places=2).scale(0.22)
+        cos_value.add_updater(
+            lambda obj: obj.set_value(circle_point.get_x()).next_to([circle_point.get_x()+0.1, 0, 0], DOWN*0.15)
+        )
+
+
+        self.camera.frame.move_to([0, 2.6, 0])
+        self.add(VGroup(circle, circle_point, inv_adjacent, inv_opposite, axes, triangle, theta_arc, theta_letter, cos_axes_label, cos_value, sin_axes_label, sin_value, unit))
+        self.play(self.camera.frame.animate.move_to([1, 0, 0]).set_height(2.5))
+        self.wait(2)
+
+        ##Functions geometric
+            #sides
+        a = Tex('a').next_to(triangle[1].get_center(), RIGHT*0.05).scale(0.3)
+        b = Tex('b').next_to(triangle[2].get_center(), DOWN*0.02).scale(0.3)
+        c = Tex('c').next_to(triangle[0].get_center(), DOWN*0.02+RIGHT*0.05).scale(0.3)
+            #tan
+        tan_point = Dot([1, np.tan(Angle(x_axis, radius).get_value()), 0])
+        tan_point.add_updater(
+            lambda obj: obj.become(Dot([1, np.tan(Angle(x_axis, radius).get_value()), 0]))
+        )
+        tan_triangle = VGroup(
+            DashedLine([0, 0, 0], tan_point.get_center(), stroke_width=1).set_z_index(-1),
+            Line(tan_point.get_center(), [1, 0, 0], stroke_width=0.7, color=BLUE),
+            Line([0, 0, 0], [1, 0, 0], stroke_width=0.9, color=BLUE).set_z_index(2),
+            Square(side_length=0.07, color=RED, stroke_width=0.7)
+            .align_to(
+                [1, 0, 0], 
+                DOWN+RIGHT if circle_point.get_y() > 0  else UP+LEFT
+            ).set_z_index(-1)
+        )
+        tan_triangle.add_updater(
+            lambda obj: obj.become(
+                VGroup(
+                    DashedLine([0, 0, 0], tan_point.get_center(), stroke_width=1).set_z_index(-1),
+                    Line(tan_point.get_center(), [1, 0, 0], stroke_width=0.7, color=BLUE),
+                    Line([0, 0, 0], [1, 0, 0], stroke_width=0.7, color=BLUE).set_z_index(2),
+                    Square(side_length=0.09, color=RED, stroke_width=0.7)
+                    .align_to(
+                        [1, 0, 0], 
+                        DOWN+RIGHT if circle_point.get_y() > 0  else UP+LEFT
+                    ).set_z_index(-1)
+                )
+            )
+        )
+        tan_eq = MathTex(r'tan\theta=', r'\frac{a}{', r'b', r'} =', r'\frac{sin\theta}{cos\theta}').scale(0.3).move_to([2, 0.5, 0])
+        tan_eq1 = MathTex(r'tan\theta=', r'\frac{a}{', r'1', r'} =', r'a').scale(0.3).move_to([2, 0.5, 0])
+
+        tan_triangle_highlight = Polygon([0,0,0], [1, 1, 0], [1, 0, 0], color=RED, stroke_width=2)
+        
+        ##animation
+        self.play(Write(tan_eq[0]))
+        self.wait(0.5)
+        self.play(Write(VGroup(tan_eq[1], tan_eq[2], tan_eq[3],)), Write(VGroup(a, b)))
+        self.wait(1.5)
+        self.play(Write(tan_eq[4]))
+        self.wait(4)
+        self.play(Indicate(tan_eq[2]))
+        self.play(Transform(tan_eq, tan_eq1))
+        self.wait(1.5)
+        self.play(Indicate(tan_eq1[4]), run_time=1.5)
+        self.wait(0.5)
+        self.play(Create(tan_triangle[2]), Unwrite(b), Unwrite(a))
+        self.wait(0.5)
+        self.play(Create(tan_triangle[0]), Create(tan_triangle[1]))
+        self.play(Create(tan_triangle_highlight))
+        self.play(Uncreate(tan_triangle_highlight))
+        self.wait(1.5)
+        
+
+
