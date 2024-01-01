@@ -80,8 +80,7 @@ class CongruentTriangles(Scene):
 
         self.play(group.animate.restore())
         self.wait(4)
-    
-
+   
 class BG1(Scene):
     def construct(self):
         point = Point([0, 0, 0], color=WHITE)
@@ -98,7 +97,6 @@ class BG1(Scene):
         self.play(MoveAlongPath(point, Arc(radius=3, start_angle=0, angle=-PI/2)), run_time=1.5)
         self.play(MoveAlongPath(point, Arc(radius=3, start_angle=-PI/2, angle=PI)), run_time=1.5)
         self.wait()
-
  
 class PythagoreanTheorem(Scene):
     def construct(self):
@@ -480,7 +478,6 @@ class UnitCircle(MovingCameraScene):
         
         self.play(self.camera.frame.animate.shift([0,-4,0]).set(width=6.5))
 
-
 class NormalVector1(MovingCameraScene):
     def construct(self):
         block = Rectangle(color=WHITE, height=1, width=5)
@@ -526,8 +523,6 @@ class NormalVector1(MovingCameraScene):
         self.play(Circumscribe(equation_value), run_time=2)
         self.wait(1)
         self.play(self.camera.frame.animate.shift([10,0,0]))
-
-
 
 class NormalVector2(MovingCameraScene):
     def construct(self):
@@ -638,8 +633,12 @@ class NormalVector2(MovingCameraScene):
 config.frame_width = 3.555
 config.frame_height = 2
 
+
 class Tangent(MovingCameraScene):
     def construct(self):
+        def SetTheta(point, angle, t=2):
+            self.play(MoveAlongPath(point, Arc(radius=1, start_angle=np.arcsin(point.get_y()), angle=angle-np.arcsin(point.get_y()))), run_time=t)
+
         circle = Circle(radius=1, color=GREEN, stroke_width=1).rotate(45*DEGREES).set_z_index(-2)
         circle_point = Dot([0.7071, 0.7071, 0], color=WHITE, radius=0.01)
 
@@ -687,6 +686,10 @@ class Tangent(MovingCameraScene):
         theta_letter.add_updater(
             lambda obj: obj.become(Tex(r"$\theta$").move_to([0.2*np.cos(Angle(x_axis, radius).get_value()/2), 0.2*np.sin(Angle(x_axis, radius).get_value()/2), 0])).scale(0.3)
         )
+        theta_eq =  MathTex(r"\theta = " + str(round(np.arcsin(circle_point.get_y())*57.3, 2)) + r'^\circ').scale(0.3).shift([2, 0.75, 0])
+        theta_eq.add_updater(
+            lambda obj: obj.become(MathTex(r"\theta = " + str(round(np.arcsin(circle_point.get_y())*57.3, 2)) + r'^\circ')).scale(0.3).shift([2.5, 0.4, 0])
+        )
 
         inv_adjacent = DashedLine([0, circle_point.get_y(), 0], [circle_point.get_x(), circle_point.get_y(), 0], stroke_width=0.7)
         inv_adjacent.add_updater(
@@ -720,14 +723,20 @@ class Tangent(MovingCameraScene):
         b = Tex('b').next_to(triangle[2].get_center(), DOWN*0.02).scale(0.3)
         c = Tex('c').next_to(triangle[0].get_center(), DOWN*0.02+RIGHT*0.05).scale(0.3)
             #tan
-        tan_point = Dot([1, np.tan(Angle(x_axis, radius).get_value()), 0])
+        tangent_axes = VGroup(
+            Line([0, 1, 0], [1, 1, 0], stroke_width=0.5, fill_opacity=0.2),
+            Line([1, 1, 0], [1, 0, 0], stroke_width=0.5, fill_opacity=0.2)
+        ).set_z_index(-2)
+
+        tan_point = Dot([1, np.tan(Angle(x_axis, radius).get_value()), 0], radius=0)
         tan_point.add_updater(
-            lambda obj: obj.become(Dot([1, np.tan(Angle(x_axis, radius).get_value()), 0]))
+            lambda obj: obj.move_to([1, np.tan(Angle(x_axis, radius).get_value()), 0])
         )
+        self.add(tan_point)
         tan_triangle = VGroup(
-            DashedLine([0, 0, 0], tan_point.get_center(), stroke_width=1).set_z_index(-1),
-            Line(tan_point.get_center(), [1, 0, 0], stroke_width=0.7, color=BLUE),
-            Line([0, 0, 0], [1, 0, 0], stroke_width=0.9, color=BLUE).set_z_index(2),
+            DashedLine([0, 0, 0], tan_point.get_center(), stroke_width=0.7).set_z_index(-1),
+            Line(tan_point.get_center(), [1, 0, 0], stroke_width=1, color=BLUE),
+            Line([0, 0, 0], [1, 0, 0], stroke_width=1, color=BLUE).set_z_index(2),
             Square(side_length=0.07, color=RED, stroke_width=0.7)
             .align_to(
                 [1, 0, 0], 
@@ -737,10 +746,10 @@ class Tangent(MovingCameraScene):
         tan_triangle.add_updater(
             lambda obj: obj.become(
                 VGroup(
-                    DashedLine([0, 0, 0], tan_point.get_center(), stroke_width=1).set_z_index(-1),
-                    Line(tan_point.get_center(), [1, 0, 0], stroke_width=0.7, color=BLUE),
-                    Line([0, 0, 0], [1, 0, 0], stroke_width=0.7, color=BLUE).set_z_index(2),
-                    Square(side_length=0.09, color=RED, stroke_width=0.7)
+                    DashedLine([0, 0, 0], tan_point.get_center(), stroke_width=0.7).set_z_index(-1),
+                    Line(tan_point.get_center(), [1, 0, 0], stroke_width=1, color=BLUE),
+                    Line([0, 0, 0], [1, 0, 0], stroke_width=1, color=BLUE).set_z_index(2),
+                    Square(side_length=0.07, color=RED, stroke_width=0.7)
                     .align_to(
                         [1, 0, 0], 
                         DOWN+RIGHT if circle_point.get_y() > 0  else UP+LEFT
@@ -748,11 +757,20 @@ class Tangent(MovingCameraScene):
                 )
             )
         )
+
+        tan_axes_label = Tex(r'tan$\theta$').scale(0.3).move_to([1.2, 0.9, 0])
+        tan_value = DecimalNumber(tan_triangle[1].get_all_points()[0][1]).scale(0.22).move_to([1.2, 0.7, 0])
+        tan_value.add_updater(
+            lambda obj: obj.set_value(tan_triangle[1].get_all_points()[0][1])
+        )
+
         tan_eq = MathTex(r'tan\theta=', r'\frac{a}{', r'b', r'} =', r'\frac{sin\theta}{cos\theta}').scale(0.3).move_to([2, 0.5, 0])
         tan_eq1 = MathTex(r'tan\theta=', r'\frac{a}{', r'1', r'} =', r'a').scale(0.3).move_to([2, 0.5, 0])
 
-        tan_triangle_highlight = Polygon([0,0,0], [1, 1, 0], [1, 0, 0], color=RED, stroke_width=2)
-        
+        tan_triangle_highlight = Polygon([0,0,0], [1, 1, 0], [1, 0, 0], color=RED, stroke_width=2).set_z_index(2)
+        tan_leg_highlight = Line([1,1,0], [1,0,0])
+        unit_leg_hightight = Line([0,0,0], [1,0,0])
+
         ##animation
         self.play(Write(tan_eq[0]))
         self.wait(0.5)
@@ -770,7 +788,86 @@ class Tangent(MovingCameraScene):
         self.play(Create(tan_triangle[0]), Create(tan_triangle[1]))
         self.play(Create(tan_triangle_highlight))
         self.play(Uncreate(tan_triangle_highlight))
+        self.wait(0.5)
+        self.play(Create(tan_leg_highlight))
+        self.play(Create(tangent_axes))
+        self.play(Uncreate(tan_leg_highlight), Write(tan_axes_label))
+        self.play(Write(tan_value))
+        self.wait(2)
+        self.play(Indicate(sin_value), Indicate(cos_value))
+        self.add(tan_triangle)
+        self.remove(tan_eq)
+        self.play(Unwrite(tan_eq1))
+        self.play(Write(theta_eq))
+        self.wait(1)
+        SetTheta(circle_point, 60*DEGREES)
+        self.wait(0.5)
+        SetTheta(circle_point, 0.0001*DEGREES)
+        self.wait(1)
+        SetTheta(circle_point, 89*DEGREES)
         self.wait(1.5)
-        
+        tan_leg_highlight = Line([1,2,0], [1,0,0])
+        self.play(Create(tan_leg_highlight))
+        self.play(Uncreate(tan_leg_highlight))
+        self.wait(0.5)
+        self.play(Create(unit_leg_hightight))
+        self.play(Uncreate(unit_leg_hightight))
+        SetTheta(circle_point, 30*DEGREES)
+        self.wait(2)
 
+class TangentApplications(MovingCameraScene):
+    def construct(self):
+        tan = ValueTracker(1)
+        tan_label = MathTex(r'tan\alpha = ').move_to([-1.1, 0.5, 0]).scale(0.25)
+        tan_value = DecimalNumber(tan.get_value()).move_to([-0.75, 0.5, 0]).scale(0.25)
+        alpha = MathTex(r'\alpha').scale(0.35).move_to([-0.1, -0.1, 0])
+        tan_value.add_updater(
+            lambda obj: obj.set_value(tan.get_value())
+        )
+        triangle = VGroup(
+            Line([0, 0, 0], [1, tan.get_value(), 0], stroke_width=1),
+            DashedLine([1, tan.get_value(), 0], [1, 0, 0], stroke_width=1),
+            DashedLine([0, 0, 0], [1, 0, 0], stroke_width=1)
+        ).align_to([0,0,0], DOWN+LEFT)
+        triangle.add_updater(
+            lambda obj: obj.become(
+                VGroup(
+                    Line([0, 0, 0], [1, tan.get_value(), 0], stroke_width=1),
+                    DashedLine([1, tan.get_value(), 0], [1, 0, 0], stroke_width=1),
+                    DashedLine([0, 0, 0], [1, 0, 0], stroke_width=1)
+                ).align_to([0,0,0], DOWN+LEFT)
+            )
+        )
+
+        linear_plot_eq = MathTex('f(x) =', 'k', 'x = ', r'tan\alpha', r'\cdot x').scale(0.25).move_to([0, -0.5, 0])
+        axes = VGroup(
+            Axes(y_range=[0, 1], x_range=[0, 1], y_length=1, x_length=1.3, axis_config={'tip_shape':StealthTip, 'tip_height': 0.1, 'tip_width': 0.06, 'stroke_width': 0.8}).move_to([0.63, 0.475, 0]),
+            Tex('f(x)').scale(0.25).move_to([-0.1, 0.8, 0]),
+            Tex('x').scale(0.25).move_to([1.1, -0.1, 0])
+        )
+        plot = axes[0].plot(lambda x: x**2, color=RED, stroke_width=1.2)
+        derivative_triangle = Polygon([0.63, 0.4, 0], [0.7, 0.49, 0], [0.7, 0.4, 0], color=YELLOW, stroke_width=0.8).shift([0.31, 0.1, 0])
+        dx = Tex('$\Delta$x').scale(0.2).next_to(derivative_triangle.get_center(), DOWN*0.25)
+        dy = Tex('$\Delta$y').scale(0.2).next_to(derivative_triangle.get_center(), RIGHT*0.2)
+
+        self.play(Create(triangle), Write(tan_value), Write(tan_label), Write(alpha))
+        self.wait(1.5)
+        self.play(tan.animate.set_value(0.1))
+        self.wait()
+        self.play(tan.animate.set_value(10))
+        self.wait()
+        self.play(tan.animate.set_value(0.5))
+        self.wait(0.5)
+        self.play(Create(axes), run_time=2)
+        self.play(Write(linear_plot_eq), run_time=1.5)
+        self.wait(0.5)
+        self.play(Indicate(linear_plot_eq[1]), Indicate(linear_plot_eq[3]), run_time=2)
+        self.wait(1.5)
+        self.play(self.camera.frame.animate.move_to([0.5, 0.4, 0]), Unwrite(VGroup(linear_plot_eq, tan_label, tan_value)), Uncreate(triangle), Create(plot), run_time=1.5)
+        self.wait(0.5)
+        self.play(Create(derivative_triangle), Write(dx), Write(dy))
+        self.wait(0.5)
+        self.play(self.camera.frame.animate.move_to([1, 0.5, 0]).set_height(1.2))
+        self.wait(1)
+        self.play(self.camera.frame.animate.move_to([-2, -1, 0]))
 
