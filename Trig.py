@@ -632,6 +632,7 @@ class NormalVector2(MovingCameraScene):
 
 config.frame_width = 3.555
 config.frame_height = 2
+config.max_files_cached = 10000
 
 
 class Tangent(MovingCameraScene):
@@ -722,7 +723,7 @@ class Tangent(MovingCameraScene):
         a = Tex('a').next_to(triangle[1].get_center(), RIGHT*0.05).scale(0.3)
         b = Tex('b').next_to(triangle[2].get_center(), DOWN*0.02).scale(0.3)
         c = Tex('c').next_to(triangle[0].get_center(), DOWN*0.02+RIGHT*0.05).scale(0.3)
-            #tan
+            #tan-sec
         tangent_axes = VGroup(
             Line([0, 1, 0], [1, 1, 0], stroke_width=0.5, fill_opacity=0.2),
             Line([1, 1, 0], [1, 0, 0], stroke_width=0.5, fill_opacity=0.2)
@@ -758,18 +759,62 @@ class Tangent(MovingCameraScene):
             )
         )
 
-        tan_axes_label = Tex(r'tan$\theta$').scale(0.3).move_to([1.2, 0.9, 0])
-        tan_value = DecimalNumber(tan_triangle[1].get_all_points()[0][1]).scale(0.22).move_to([1.2, 0.7, 0])
+        tan_axes_label = Tex(r'tan$\theta$').scale(0.3).move_to([1.2, 0.5, 0])
+        tan_value = DecimalNumber(tan_triangle[1].get_all_points()[0][1]).scale(0.22).move_to([1.2, 0.35, 0])
         tan_value.add_updater(
             lambda obj: obj.set_value(tan_triangle[1].get_all_points()[0][1])
         )
-
+        sec_axes_label = Tex(r'sec$\theta$').scale(0.3).move_to([0.85, 1.25, 0])
+        sec_value = DecimalNumber(np.sqrt(1 + tan_value.get_value()**2)).scale(0.22).move_to([0.85, 1.1, 0])
+        sec_value.add_updater(
+            lambda obj: obj.set_value(np.sqrt(1 + tan_value.get_value()**2))
+        )
+            #csc-cot
+        cot_point = Dot([np.tan(90*DEGREES - Angle(x_axis, radius).get_value()), 1, 0], radius=0)
+        cot_point.add_updater(
+            lambda obj: obj.move_to([np.tan(90*DEGREES - Angle(x_axis, radius).get_value()), 1, 0])
+        )
+        self.add(cot_point)
+        cot_triange = VGroup(
+            Line([0, 0, 0], cot_point.get_center(), color=RED, stroke_width=1).set_z_index(-2),
+            Line(cot_point.get_center(), [0, 1, 0], stroke_width=0.5)
+        )
+        cot_triange.add_updater(
+            lambda obj: obj.become(VGroup(
+                Line([0, 0, 0], cot_point.get_center(), color=RED, stroke_width=1).set_z_index(-2),
+                Line(cot_point.get_center(), [0, 1, 0], stroke_width=0.5)
+            ))
+        )
+        csc_axes_label = Tex(r'csc$\theta$').scale(0.3).move_to([1.2, 0.9, 0])
+        csc_value = DecimalNumber(np.sqrt(1 + cot_point.get_x()**2)).scale(0.22).move_to([1.2, 0.75, 0])
+        csc_value.add_updater(
+            lambda obj: obj.set_value(np.sqrt(1 + cot_point.get_x()**2))
+        )
+        cot_axes_label = Tex(r'cot$\theta$').scale(0.3).move_to([0.35, 1.25, 0])
+        cot_value = DecimalNumber(cot_point.get_x()).scale(0.22).move_to([0.35, 1.1, 0])
+        cot_value.add_updater(
+            lambda obj: obj.set_value(cot_point.get_x())
+        )
+            ##misc     
+           
         tan_eq = MathTex(r'tan\theta=', r'\frac{a}{', r'b', r'} =', r'\frac{sin\theta}{cos\theta}').scale(0.3).move_to([2, 0.5, 0])
         tan_eq1 = MathTex(r'tan\theta=', r'\frac{a}{', r'1', r'} =', r'a').scale(0.3).move_to([2, 0.5, 0])
 
         tan_triangle_highlight = Polygon([0,0,0], [1, 1, 0], [1, 0, 0], color=RED, stroke_width=2).set_z_index(2)
         tan_leg_highlight = Line([1,1,0], [1,0,0])
         unit_leg_hightight = Line([0,0,0], [1,0,0])
+        tan_hyp_highlight = Line([0,0,0], [1, 0.58, 0], stroke_width=5)
+
+        cot_triangle_highlight = Polygon([0,0,0], [1.724, 1, 0], [0, 1, 0], color=GREEN, stroke_width=3).set_z_index(2)
+        cot_theta = Tex(r'$\theta$').scale(0.45).move_to([1.8, 1.1, 0])
+        cot_alt_angle_highlight = VGroup(
+            Line([0,1,0], [1.724, 1, 0]),
+            Line([1.724, 1, 0], [0,0,0]),
+            Line([0,0,0], [1, 0, 0])
+        ).set_z_index(3)
+        cot_leg_highlight = Line([0,0,0], [0,1,0], color=YELLOW).set_z_index(2)
+        cot_hyp_highlight = Line([0,0,0], [1.724, 1, 0]).set_z_index(2)
+        cot_adj_highlight = Line([0,1,0], [1.724, 1, 0]).set_z_index(2)
 
         ##animation
         self.play(Write(tan_eq[0]))
@@ -801,9 +846,7 @@ class Tangent(MovingCameraScene):
         self.play(Write(theta_eq))
         self.wait(1)
         SetTheta(circle_point, 60*DEGREES)
-        self.wait(0.5)
         SetTheta(circle_point, 0.0001*DEGREES)
-        self.wait(1)
         SetTheta(circle_point, 89*DEGREES)
         self.wait(1.5)
         tan_leg_highlight = Line([1,2,0], [1,0,0])
@@ -814,6 +857,103 @@ class Tangent(MovingCameraScene):
         self.play(Uncreate(unit_leg_hightight))
         SetTheta(circle_point, 30*DEGREES)
         self.wait(2)
+        self.play(Unwrite(theta_eq), self.camera.frame.animate.move_to([-0.7, 0, 0]))
+        self.wait(3.5)
+
+        ##inverse func
+        eqs = VGroup(
+            MathTex(r'csc\theta = \frac{1}{sin\theta}', r'= \frac{c}{a}').scale(0.3).move_to([-2, 0.4, 0]),
+            MathTex(r'sec\theta = \frac{1}{cos\theta}', r'= \frac{c}{b}').scale(0.3).move_to([-2, 0, 0]),
+            MathTex(r'cot\theta = \frac{1}{tan\theta}', r'= \frac{cos\theta}{sin\theta}').scale(0.3).move_to([-2, -0.4, 0])
+        )
+
+        self.play(Write(eqs[0][0]))
+        self.play(Write(eqs[1][0]))
+        self.play(Write(eqs[2][0]))
+        a = Tex('a').move_to(triangle[1].get_center() + LEFT*0.06).scale(0.3)
+        b = Tex('b').move_to(triangle[2].get_center() + DOWN*0.08).scale(0.3)
+        c = Tex('c').move_to(triangle[0].get_center() + DOWN*0.05+RIGHT*0.05).scale(0.3)
+        self.wait(0.2)
+        self.play(Write(VGroup(a,b,c)))
+        self.wait(1)
+        self.play(Write(eqs[0][1]))
+        self.wait()
+        self.play(Write(eqs[1][1]))
+        self.wait(1)
+        self.play(Write(eqs[2][1]))
+        self.wait(1.5)
+        self.play(Unwrite(eqs), self.camera.frame.animate.move_to([1.2, 0.2, 0]).set_height(3))
+        self.wait(1.5)
+        hyp_opp_highlight = Line([0.87, 0.5, 0], [0.87, 0, 0])
+        adj_opp_highlight = Line([1, 0.58, 0], [1, 0, 0])
+        csc_eq = MathTex(r'csc\theta = \frac{c}{', 'a', '}').scale(0.4).move_to([2.5, -0.5, 0])
+        
+        self.play(Write(csc_eq))
+        self.wait(2.5)
+        self.play(Indicate(csc_eq[1]), run_time=1.5)
+        self.wait(1.5)
+        self.play(Create(hyp_opp_highlight))
+        self.play(Uncreate(hyp_opp_highlight))
+        self.play(Create(adj_opp_highlight))
+        self.play(Uncreate(adj_opp_highlight))
+        self.wait(2.5)
+        self.play(Create(cot_triange), run_time=1.5)
+        self.wait(1.5)
+        self.play(Create(cot_triangle_highlight))
+        self.play(Uncreate(cot_triangle_highlight), Unwrite(csc_eq), Unwrite(VGroup(a,b,c)))
+        self.wait(1)
+        self.play(FadeIn(cot_theta))
+        self.wait(0.5)
+        self.play(Create(cot_alt_angle_highlight))
+        self.play(Uncreate(cot_alt_angle_highlight))
+        self.wait(1)
+        self.play(Create(cot_leg_highlight))
+        self.wait(1.5)
+        self.play(Uncreate(cot_leg_highlight))
+        self.wait(0.5)
+        self.play(Create(cot_hyp_highlight))
+        self.wait(1.5)
+        self.play(Uncreate(cot_hyp_highlight), Write(csc_axes_label), Write(csc_value))
+        self.wait(2.5)
+        cot_triangle_highlight = Polygon([0,0,0], [1.724, 1, 0], [0, 1, 0], color=GREEN, stroke_width=3).set_z_index(2)
+        self.play(Create(cot_triangle_highlight))
+        self.play(Uncreate(cot_triangle_highlight))
+        self.wait(0.5)
+        self.play(Create(cot_adj_highlight))
+        self.wait(1)
+        self.play(Uncreate(cot_adj_highlight))
+        self.wait(0.5)
+        self.play(Write(VGroup(cot_axes_label, cot_value)))
+        self.wait(0.7)
+        self.play(Indicate(cot_theta), run_time=1)
+        cot_leg_highlight = Line([0,0,0], [0,1,0], stroke_width=4.5).set_z_index(2)
+        self.wait(1)
+        self.play(Create(cot_leg_highlight))
+        self.wait(1)
+        self.play(Uncreate(cot_leg_highlight))
+        self.wait(3)
+        tan_triangle_highlight = Polygon([0,0,0], [1, 0.58, 0], [1, 0, 0], stroke_width=5).set_z_index(2)
+        self.play(Create(tan_triangle_highlight))
+        self.wait(1.5)
+        self.play(Uncreate(tan_triangle_highlight))
+        self.wait(0.5)
+        self.play(Create(tan_hyp_highlight))
+        self.wait(1.5)
+        self.play(Uncreate(tan_hyp_highlight), Write(VGroup(sec_axes_label, sec_value)))
+        self.wait(1.5)
+        self.play(Uncreate(cot_theta))
+        SetTheta(circle_point, 70*DEGREES, 2.5)
+        SetTheta(circle_point, 20*DEGREES, 3.5)
+        SetTheta(circle_point, 45*DEGREES, 2)
+        self.play(self.camera.frame.animate.shift([0, -0.1, 0]))
+        self.wait(2.5)
+        self.play(self.camera.frame.animate.move_to([-1.2, -0.1, 0]))
+        SetTheta(circle_point, 150*DEGREES)
+        self.play(self.camera.frame.animate.shift([0.1, 0.1, 0]))
+        self.wait(3)
+        self.play()
+
+
 
 class TangentApplications(MovingCameraScene):
     def construct(self):
