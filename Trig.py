@@ -6,6 +6,7 @@ from manim.animation.animation import DEFAULT_ANIMATION_LAG_RATIO, DEFAULT_ANIMA
 from manim.mobject.mobject import Mobject
 from manim.scene.scene import Scene
 from manim.utils.rate_functions import smooth
+config.max_files_cached = -1
 
 
 ##TRIANGLES
@@ -632,7 +633,6 @@ class NormalVector2(MovingCameraScene):
 
 config.frame_width = 3.555
 config.frame_height = 2
-config.max_files_cached = 10000
 
 
 class Tangent(MovingCameraScene):
@@ -765,9 +765,9 @@ class Tangent(MovingCameraScene):
             lambda obj: obj.set_value(tan_triangle[1].get_all_points()[0][1])
         )
         sec_axes_label = Tex(r'sec$\theta$').scale(0.3).move_to([0.85, 1.25, 0])
-        sec_value = DecimalNumber(np.sqrt(1 + tan_value.get_value()**2)).scale(0.22).move_to([0.85, 1.1, 0])
+        sec_value = DecimalNumber(np.sqrt(1 + tan_value.get_value()**2) * (-1 if circle_point.get_x() < 0 else 1)).scale(0.22).move_to([0.85, 1.1, 0])
         sec_value.add_updater(
-            lambda obj: obj.set_value(np.sqrt(1 + tan_value.get_value()**2))
+            lambda obj: obj.set_value(np.sqrt(1 + tan_value.get_value()**2) * (-1 if circle_point.get_x() < 0 else 1))
         )
             #csc-cot
         cot_point = Dot([np.tan(90*DEGREES - Angle(x_axis, radius).get_value()), 1, 0], radius=0)
@@ -786,9 +786,9 @@ class Tangent(MovingCameraScene):
             ))
         )
         csc_axes_label = Tex(r'csc$\theta$').scale(0.3).move_to([1.2, 0.9, 0])
-        csc_value = DecimalNumber(np.sqrt(1 + cot_point.get_x()**2)).scale(0.22).move_to([1.2, 0.75, 0])
+        csc_value = DecimalNumber(np.sqrt(1 + cot_point.get_x()**2) * (-1 if circle_point.get_y() < 0 else 1)).scale(0.22).move_to([1.2, 0.75, 0])
         csc_value.add_updater(
-            lambda obj: obj.set_value(np.sqrt(1 + cot_point.get_x()**2))
+            lambda obj: obj.set_value(np.sqrt(1 + cot_point.get_x()**2) * (-1 if circle_point.get_y() < 0 else 1))
         )
         cot_axes_label = Tex(r'cot$\theta$').scale(0.3).move_to([0.35, 1.25, 0])
         cot_value = DecimalNumber(cot_point.get_x()).scale(0.22).move_to([0.35, 1.1, 0])
@@ -951,9 +951,129 @@ class Tangent(MovingCameraScene):
         SetTheta(circle_point, 150*DEGREES)
         self.play(self.camera.frame.animate.shift([0.1, 0.1, 0]))
         self.wait(3)
-        self.play()
 
+            #EVENNESS
+        quarter_labels = VGroup(
+            Tex('I').scale(0.5).move_to([0.4, 0.4, 0]),
+            Tex('II').scale(0.5).move_to([-0.4, 0.4, 0]),
+            Tex('III').scale(0.5).move_to([-0.4, -0.4, 0]),
+            Tex('IV').scale(0.5).move_to([0.4, -0.4, 0])
+        )
 
+        inverse_func_reminder = VGroup(
+            MathTex(r'csc = \frac{1}{sin}').scale(0.4).move_to([0, 0, 0]),
+            MathTex(r'sec = \frac{1}{cos}').scale(0.4).move_to([0, -0.65, 0]),
+            MathTex(r'cot = \frac{1}{tan}').scale(0.4).move_to([0, -1.3, 0])
+        ).move_to([-3, 0, 0])
+
+        i_signs = VGroup(
+            Tex('I').scale(0.5).move_to([0, 0, 0]),
+            Tex('sin +').scale(0.35).move_to([0, -0.3, 0]),
+            Tex('cos +').scale(0.35).move_to([0, -0.5, 0]),
+            Tex('tan +').scale(0.35).move_to([0, -0.7, 0])
+        ).move_to([-1.85, 0.5, 0])
+        ii_signs = VGroup(
+            Tex('II').scale(0.5).move_to([0, 0, 0]),
+            Tex('sin +').scale(0.35).move_to([0, -0.3, 0]),
+            Tex('cos -').scale(0.35).move_to([0, -0.5, 0]),
+            Tex('tan -').scale(0.35).move_to([0, -0.7, 0])
+        ).move_to([-2.85, 0.5, 0])
+        iii_signs = VGroup(
+            Tex('III').scale(0.5).move_to([0, 0, 0]),
+            Tex('sin -').scale(0.35).move_to([0, -0.3, 0]),
+            Tex('cos -').scale(0.35).move_to([0, -0.5, 0]),
+            Tex('tan +').scale(0.35).move_to([0, -0.7, 0])
+        ).move_to([-2.85, -0.5, 0])
+        iv_signs = VGroup(
+            Tex('IV').scale(0.5).move_to([0, 0, 0]),
+            Tex('sin -').scale(0.35).move_to([0, -0.3, 0]),
+            Tex('cos +').scale(0.35).move_to([0, -0.5, 0]),
+            Tex('tan -').scale(0.35).move_to([0, -0.7, 0])
+        ).move_to([-1.85, -0.5, 0])
+
+        projection_sin_ii = Line([0,0,0], [0, 0.87, 0], color=RED, stroke_width=4).set_z_index(2)
+        projection_cos_ii = Line([0,0,0], [-0.5, 0, 0], color=BLUE, stroke_width=4).set_z_index(2)
+        projection_sin_iii = Line([0,0,0], [0, -0.71, 0], color=BLUE, stroke_width=4).set_z_index(2)
+        projection_cos_iii = Line([0,0,0], [-0.71, 0, 0], color=BLUE, stroke_width=4).set_z_index(2)       
+
+        self.play(Write(quarter_labels))
+        self.play(MoveAlongPath(circle_point, Arc(radius=1, start_angle=150*DEGREES, angle=-85*DEGREES)), run_time=1.7)
+        self.wait(0.8)
+        self.play(Write(i_signs))
+        self.wait(2)
+        self.play(Write(inverse_func_reminder))
+        self.wait(1.5)
+        self.play(Unwrite(inverse_func_reminder))
+        self.wait(0.8)
+        self.play(MoveAlongPath(circle_point, Arc(radius=1, start_angle=65*DEGREES, angle=55*DEGREES)), Write(ii_signs), run_time=1.7)
+        self.play(Indicate(ii_signs[1]))
+        self.wait(0.8)
+        self.play(Indicate(ii_signs[2]), Indicate(ii_signs[3]))
+        self.wait(2)
+        self.play(Create(projection_sin_ii))
+        self.wait(1.5)
+        self.play(Uncreate(projection_sin_ii))
+        self.wait(1)
+        self.play(Create(projection_cos_ii))
+        self.wait(0.5)
+        self.play(Uncreate(projection_cos_ii))
+        self.wait(2.5)
+        self.play(Indicate(ii_signs[3]), run_time=2)
+        self.wait(1)
+        self.play(MoveAlongPath(circle_point, Arc(radius=1, start_angle=120*DEGREES, angle=105*DEGREES)), Write(iii_signs), run_time=1.7)
+        self.wait(1.5)
+        self.play(Create(projection_cos_iii), Create(projection_sin_iii))
+        self.wait(0.5)
+        self.play(Uncreate(projection_cos_iii), Uncreate(projection_sin_iii))
+        self.wait(0.5)
+        self.play(Indicate(iii_signs[3]))
+        self.wait(1)
+        self.play(MoveAlongPath(circle_point, Arc(radius=1, start_angle=225*DEGREES, angle=105*DEGREES)), Write(iv_signs), run_time=1.7)
+        self.wait(3)
+        self.play(self.camera.frame.animate.move_to([1.2, 0, 0]), Unwrite(VGroup(i_signs, ii_signs, iii_signs, iv_signs)), run_time=2)
+        self.wait(2)
+            #please
+        negative_arc = Sector(inner_radius=0.5, outer_radius=0.4, start_angle=0, angle=-30*DEGREES, color=BLUE, fill_opacity=0.6)
+        even_cos_highlight = Line([0, 0, 0], [0.87, 0, 0], color=RED, stroke_width=5).set_z_index(2)
+        evenness_cos_eq = MathTex(r'cos(-\theta) = cos(\theta)').scale(0.33).move_to([2.5, 0.2, 0])
+        evenness_sec_eq = MathTex(r'sec(-\theta) = sec(\theta)').scale(0.33).move_to([2.5, -0.2, 0])
+
+        even_odd_table = VGroup(
+            VGroup(
+                Tex('Even', color=RED).scale(0.4).move_to([0,0,0]),
+                Tex('cos').scale(0.3).move_to([0,-0.25,0]),
+                Tex('sec').scale(0.3).move_to([0,-0.5,0])
+            ).move_to([2.2, 0, 0]),
+            VGroup(
+                Tex('Odd', color=BLUE).scale(0.4).move_to([0,0,0]),
+                Tex('sin').scale(0.3).move_to([0,-0.25,0]),
+                Tex('csc').scale(0.3).move_to([0,-0.5,0]),
+                Tex('tan').scale(0.3).move_to([0,-0.75,0]),
+                Tex('cot').scale(0.3).move_to([0,-1,0]),
+            ).move_to([2.9, 0, 0])
+        )
+
+        self.play(DrawBorderThenFill(negative_arc))
+        self.wait(0.5)
+        self.play(Uncreate(negative_arc))
+        self.wait(1)
+        self.play(Create(even_cos_highlight))
+        self.wait(1.5)
+        self.play(Indicate(cos_axes_label))
+        self.wait(1.5)
+        self.play(MoveAlongPath(circle_point, Arc(radius=1, start_angle=-30*DEGREES, angle=60*DEGREES)),  run_time=1)
+        self.wait(2)
+        self.play(Write(evenness_cos_eq), Uncreate(even_cos_highlight))
+        self.wait(2.2)
+        self.play(Write(evenness_sec_eq))
+        self.wait(2.5)
+        self.play(Transform(VGroup(evenness_cos_eq, evenness_sec_eq), even_odd_table[0]))
+        self.wait(1.5)
+        self.play(Write(even_odd_table[1]))
+        self.wait(0.5)
+        self.play(MoveAlongPath(circle_point, Arc(radius=1, start_angle=30*DEGREES, angle=-60*DEGREES)),  run_time=2)
+        self.play(self.camera.frame.animate.shift([0.001, 0, 0]), run_time=0.01)
+        self.wait(3)
 
 class TangentApplications(MovingCameraScene):
     def construct(self):
