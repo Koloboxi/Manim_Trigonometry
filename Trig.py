@@ -631,8 +631,8 @@ class NormalVector2(MovingCameraScene):
         self.wait(2)
 
 
-config.frame_width = 3.555
-config.frame_height = 2
+# config.frame_width = 3.555
+# config.frame_height = 2
 
 
 class Tangent(MovingCameraScene):
@@ -1131,3 +1131,95 @@ class TangentApplications(MovingCameraScene):
         self.wait(1)
         self.play(self.camera.frame.animate.move_to([-2, -1, 0]))
 
+
+#PLOTS
+class Radians(MovingCameraScene):
+    def construct(self):
+        circle = Circle(radius=3, color=BLUE, stroke_width=2)
+        center = Dot(color=WHITE, radius=0.05)
+        radius = Line([0, 0, 0], [3, 0, 0], color=DARK_BROWN)
+        r_letter = Tex('r').next_to(radius.get_center(), DOWN)
+        rad_letter = Tex('rad').move_to([0.75, 0.4, 0]) 
+        arc = radius.copy()
+        circle_highlight = Circle(radius=3, color=YELLOW).set_z_index(2)
+        circumference_eq = MathTex(r'C = 2\pi r').move_to([-5, 2.5, 0])
+        
+
+        self.play(Create(VGroup(circle, center)), run_time=2)
+        self.play(Create(radius))
+        self.play(Write(r_letter))
+        self.add(arc)
+        self.wait(1)
+        self.play(Transform(arc, Arc(3, 0, 1, color=LIGHT_BROWN).set_z_index(2), path_arc=1.5, path_arc_centers=[2.5, 1, 0]))
+        self.wait(0.5)
+        r_arc_letter = Tex('r').next_to(arc.get_center(), RIGHT*2+UP)
+        self.play(Write(r_arc_letter))
+        self.play(Indicate(r_arc_letter))
+        self.wait(0.5)
+
+            ##UPDATABLE
+        angle_radius = DashedLine([0, 0, 0], [1.62, 2.52, 0], dash_length=0.2, stroke_width=2.5)
+        arc.add_updater(
+            lambda obj: obj.become(Arc(3, 0, Angle(Line([0, 0, 0], [3, 0, 0]), angle_radius).get_value(), color=LIGHT_BROWN).set_z_index(2))
+        )
+        theta_tracker = VGroup(
+            MathTex(r'\theta = '),
+            DecimalNumber(Angle(Line([0, 0, 0], [3, 0, 0]), angle_radius).get_value()).shift([1, 0, 0]),
+            DecimalNumber(Angle(Line([0, 0, 0], [3, 0, 0]), angle_radius).get_value()/PI).shift([1, -0.7, 0]),
+            MathTex(r'\pi').shift([1.7, -0.7, 0]).scale(1.3)
+        ).move_to([-4.7, 1.5, 0])
+        theta_tracker[1].add_updater(
+            lambda obj: obj.set_value(Angle(Line([0, 0, 0], [3, 0, 0]), angle_radius).get_value())
+        )
+        theta_tracker[2].add_updater(
+            lambda obj: obj.set_value(Angle(Line([0, 0, 0], [3, 0, 0]), angle_radius).get_value()/PI)
+        )
+
+        rad_sectors = VGroup(
+            *[Line([0,0,0], [3, 0, 0], stroke_width=2)
+              .rotate(i + 1, about_point=[0,0,0])
+              for i in range(6)]
+        )
+
+        self.play(Create(angle_radius), Write(rad_letter), run_time=1.5)
+        self.wait(1.5)
+        self.play(Create(circle_highlight))
+        self.play(Write(circumference_eq))   
+        self.play(Uncreate(circle_highlight), Unwrite(r_arc_letter), Unwrite(rad_letter), run_time=1.5)
+        self.wait(1)
+        self.play(Write(theta_tracker), Unwrite(circumference_eq))   
+        self.play(Rotate(angle_radius, 2*PI-1, about_point=[0,0,0]), Create(rad_sectors), run_time=2)
+        self.wait(0.5)   
+        self.play(Indicate(theta_tracker[3]), run_time=1.5)
+        self.play(Indicate(theta_tracker[1]), run_time=1.5)
+        self.play(Uncreate(rad_sectors))
+        self.wait(1.5)
+        self.play(Rotate(angle_radius, -PI, about_point=[0,0,0]))
+        self.wait(1.5)
+        self.play(Rotate(angle_radius, -PI/2, about_point=[0,0,0]))
+        self.wait(1.5)
+        self.play(Rotate(angle_radius, -PI/4, about_point=[0,0,0]))
+        self.wait(1)  
+        self.play(Rotate(angle_radius, 1-PI/4, about_point=[0,0,0]))
+        self.wait(2)
+        self.play(self.camera.frame.animate.shift([3, 0, 0]), theta_tracker.animate.move_to([5, -2, 0]))
+        self.wait(2)
+
+            ##arc length
+        arc_length_eq_3 = MathTex('r', r'\theta', '= 3').move_to([4, 1.5, 0])
+        arc_length_eq_6 = MathTex(r'r\theta', '= 6').move_to([4, 1.5, 0])
+        arc_length_eq = MathTex(r'r\theta = 15.42').move_to([4.15, 1.5, 0])
+
+        self.play(Transform(r_letter, MathTex('r = 3').next_to(radius.get_center(), DOWN)))
+        self.wait(1)
+        self.play(Write(arc_length_eq_3[0]))
+        self.play(Write(arc_length_eq_3[1]))
+        self.wait(0.5)
+        self.play(Indicate(theta_tracker[1]))
+        self.play(Write(arc_length_eq_3[2]))
+        self.wait(0.5)
+        self.play(Rotate(angle_radius, 1, about_point=[0,0,0]), Transform(arc_length_eq_3, arc_length_eq_6))
+        self.wait(1.5)
+        self.play(Rotate(angle_radius, PI, about_point=[0,0,0]), Transform(arc_length_eq_3, arc_length_eq))
+        self.wait(2)
+        self.play(self.camera.frame.animate.shift([0, -7, 0]))
