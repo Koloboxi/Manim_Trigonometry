@@ -1223,3 +1223,180 @@ class Radians(MovingCameraScene):
         self.play(Rotate(angle_radius, PI, about_point=[0,0,0]), Transform(arc_length_eq_3, arc_length_eq))
         self.wait(2)
         self.play(self.camera.frame.animate.shift([0, -7, 0]))
+
+class Plots(MovingCameraScene):
+    def construct(self):
+        def NumbersToPIs(num_line, n):
+            for i in range(int(n/2)):
+                numberl = num_line.numbers[i]
+                numberr = num_line.numbers[-(i+1)]
+                numberl.become(Tex(
+                    '-', 
+                    '' if numberl.get_value() > -4 
+                    else str(int(n/2-i)), 
+                    r'$\pi$'
+                ).move_to(numberl.get_center()))
+                numberr.become(Tex(
+                    '' if numberr.get_value() < 4 
+                    else str(int(n/2-i)), 
+                    r'$\pi$'
+                ).move_to(numberr.get_center()))
+        def MoveCamera(point, zoom=1, t=1):
+            self.play(self.camera.frame.animate.move_to(point).set_height(8*zoom), run_time=t)
+
+        #Creating ax
+        ax = Axes(
+            x_range=[-4, 4, PI],
+            y_range=[-1.8, 2, 1],
+            axis_config={
+                "tip_shape": StealthTip,
+                'include_numbers': True
+            },
+        )
+        labels = ax.get_axis_labels(
+            MathTex(r"\theta"), MathTex(r"f(\theta)")
+        )
+        NumbersToPIs(ax.get_axes()[0], 2)       
+        self.play(Write(ax), Write(labels), run_time=1)
+        MoveCamera([6, 3, 0])
+        self.wait(2)
+        self.play(Indicate(labels[0]), run_time=1)
+        self.wait(1.5)
+        self.play(Indicate(ax.get_axes()[0].numbers[1]), run_time=1)
+        self.wait(1.5)
+        self.play(Indicate(labels[1]))
+        self.wait(0.5)
+
+        #Unit circle reference
+        circle= VGroup(
+            Circle(radius=2.5, stroke_width=2, color=GREEN), 
+            DashedLine(DOWN*2.5, UP*2.5, color=GREEN, stroke_width=2),
+            Line([0, 0, 0], [2.5, 0, 0], stroke_width=2)
+        ).move_to([9, 3.2, 0])
+        arc = always_redraw(
+            lambda: Arc(radius=0.3, angle=circle[2].get_angle(), start_angle=0, arc_center=circle.get_center())
+        )
+        perp = always_redraw(
+            lambda: Line(circle[2].get_all_points()[3], [circle[2].get_all_points()[3][0], circle[2].get_all_points()[3][1], 0], stroke_width=2)
+        )
+        sin_value = DecimalNumber(np.sin(circle[2].get_angle())).move_to([5.8, 3.2, 0]).scale(0.9)
+        sin_value.add_updater(lambda obj:
+            obj.set_value(np.sin(circle[2].get_angle())).move_to([circle[0].get_x()-3.2, circle[2].get_all_points()[3][1], 0])
+        )
+        sin_label = Tex('sin').move_to([9, 6, 0])
+
+        self.play(Create(circle[0]), Create(circle[1]), Create(circle[2]), Write(VGroup(sin_label, sin_value)))
+        self.add(perp, arc)
+        self.wait(1.5)
+        self.play(Circumscribe(sin_value, fade_out=True), run_time=1.5)
+        self.wait(2)
+
+        #plotting
+        theta_tracker = VGroup(
+            MathTex(r'\theta ='),
+            DecimalNumber(circle[2].get_angle()).shift([1, 0, 0])
+        ).move_to([3, 3.4, 0])
+        theta_tracker[1].add_updater(
+            lambda obj: obj.set_value(circle[2].get_angle())
+        )
+        sine = VGroup(
+            ax.plot(np.sin, x_range=[0, PI/2], color=YELLOW),
+            ax.plot(np.sin, x_range=[PI/2, PI], color=YELLOW),
+            ax.plot(np.sin, x_range=[-PI, 0], color=YELLOW).flip()
+        )
+        tick12PI = VGroup(
+            ax[0].get_tick(PI/2, 0.1),
+            MathTex(r'\frac{\pi}{2}').next_to(ax[0].get_tick(PI/2, 0.1).get_center(), UP).scale(0.85)
+        )
+        tick_12PI = VGroup(
+            ax[0].get_tick(-PI/2, 0.1),
+            MathTex(r'-\frac{\pi}{2}').next_to(ax[0].get_tick(-PI/2, 0.1).get_center(), DOWN).scale(0.85)
+        )
+        questions = VGroup(
+            Tex('?').next_to(ax.c2p(PI, 0, 0), UP+RIGHT),
+            Tex('?').next_to(ax.c2p(-PI, 0, 0), UP+LEFT)
+        )
+        self.play(Write(theta_tracker))
+        self.wait(1.2)
+        self.play(Rotate(circle[2], PI/2, about_point=[9, 3.2, 0]), Create(sine[0]), rate_func=linear, run_time=5)
+        self.wait(1.2)
+        self.play(Write(tick12PI))
+        self.wait(1.3)
+        self.play(Circumscribe(sin_value, fade_out=True), run_time=1.5)       
+        self.wait(1.7)
+        self.play(Rotate(circle[2], PI/2, about_point=[9, 3.2, 0]), Create(sine[1]), rate_func=linear, run_time=5)
+        self.wait(1)
+        self.play(Indicate(ax[0].numbers[1], color=RED), run_time=2)
+        self.wait(2.5)
+        self.play(self.camera.frame.animate.move_to([-4, -3, 0]), VGroup(circle, sin_label, sin_value).animate.move_to([-7.5, -3.5, 0]), theta_tracker.animate.move_to([-2, -4.5, 0]))
+        self.wait(1)
+        self.play(Rotate(circle[2], -PI, about_point=circle.get_center()))
+        self.wait(3)
+        self.play(Create(sine[2]), Rotate(circle[2], -PI, about_point=circle.get_center()), Write(tick_12PI), rate_func=linear, run_time=4)
+        self.wait(2.5)
+        MoveCamera([0,0,0])
+        self.wait(0.5)
+        self.play(ShowPassingFlash(
+            ax.plot(np.sin, x_range=[-PI, PI], color=BLUE, stroke_width=10), 
+            time_width=1,
+            run_time=2
+        ))
+        self.play(Write(questions))
+        self.play(Flash(questions[0].get_center()))
+        self.play(Flash(questions[1].get_center()), Unwrite(questions[0]))
+        self.play(Unwrite(questions[1]))
+        theta_tracker.move_to([-20, -2, 0]).scale(1.2)
+        
+
+        #abs theta tracker
+        abs_theta_value = ValueTracker(value=-3.14)
+        abs_theta_tracker = VGroup(
+            MathTex(r'\theta ='),
+            DecimalNumber(abs_theta_value.get_value()).shift(RIGHT),
+            MathTex(r'-7.5\pi').shift(RIGHT*1.2).set_opacity(0),
+            MathTex(r'0.5\pi').shift(RIGHT).set_opacity(0)
+        ).move_to([-12, -5, 0]).scale(1.2)
+        abs_theta_tracker[1].add_updater(lambda obj: obj.set_value(abs_theta_value.get_value()))
+        self.add(abs_theta_tracker)
+        MoveCamera([-7.5, -3.5, 0])
+        self.wait(1)
+        self.play(Rotate(circle[2], -PI/2 - 6*PI, about_point=circle.get_center()), abs_theta_value.animate.set_value(-23.56), run_time=2.5)
+        self.wait(2.5)
+        self.play(FadeOut(abs_theta_tracker[1]), abs_theta_tracker[2].animate.set_opacity(1))
+        self.wait(.5)
+        self.play(Circumscribe(abs_theta_tracker[2], fade_in=True), run_time=1.5)
+        self.wait(1)
+        self.play(FadeOut(abs_theta_tracker[2]), abs_theta_tracker[3].animate.set_opacity(1))
+        self.wait(2)
+        self.play(Rotate(circle[2], -1.5*PI, about_point=circle.get_center()), Unwrite(VGroup(abs_theta_tracker[0], abs_theta_tracker[3])))
+                
+        #periods
+        self.remove(ax, tick12PI, tick_12PI, theta_tracker, abs_theta_tracker)
+        ax = Axes(
+            x_range=[-10, 10, PI],
+            y_range=[-1.8, 2, 1],
+            axis_config={
+                "tip_shape": StealthTip,
+                'include_numbers': True
+            },
+        )
+        NumbersToPIs(ax.get_axes()[0], 6)
+        self.add(ax)
+        sine.become(ax.plot(np.sin, x_range=[-PI, PI], color=YELLOW))
+        sine_extends = VGroup(
+            ax.plot(np.sin, x_range=[-3*PI, -PI], color=YELLOW).flip().flip(RIGHT),
+            ax.plot(np.sin, x_range=[PI, 3*PI], color=YELLOW),
+        )
+        sin_value.clear_updaters()
+        sin_value.add_updater(lambda obj:
+            obj.set_value(np.sin(circle[2].get_angle())).move_to([circle[0].get_x()-1.7, circle[2].get_all_points()[3][1], 0])
+        )
+        self.play(self.camera.frame.animate.move_to([0, 0.75, 0]), VGroup(circle, sin_label, sin_value).animate.move_to([4.5, 2.5, 0]).scale(0.6))
+        self.wait(2.5)
+        self.play(Rotate(circle[2], -2*PI, about_point=circle.get_center()), Create(sine_extends[0]), run_time=4)
+        self.wait(1)
+        self.play(Rotate(circle[2], 2*PI, about_point=circle.get_center()), Create(sine_extends[1]), run_time=2)
+        self.play(FadeOut(circle, sin_value, sin_label, perp, arc), Flash(circle.get_center(), 0.5, 12, 0.3))
+        self.wait(2)
+        
+
