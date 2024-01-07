@@ -1396,7 +1396,74 @@ class Plots(MovingCameraScene):
         self.play(Rotate(circle[2], -2*PI, about_point=circle.get_center()), Create(sine_extends[0]), run_time=4)
         self.wait(1)
         self.play(Rotate(circle[2], 2*PI, about_point=circle.get_center()), Create(sine_extends[1]), run_time=2)
+        self.wait(3.5)
         self.play(FadeOut(circle, sin_value, sin_label, perp, arc), Flash(circle.get_center(), 0.5, 12, 0.3))
+        self.wait(0.5)
+        self.play(self.camera.frame.animate.move_to([0, 8, 0]), Uncreate(sine), Uncreate(sine_extends[0]), Uncreate(sine_extends[1]))
+        self.wait(2.5)
+
+        #analytic cos
+        cos_eq = VGroup(
+            MathTex(r'cos\theta = sin(', r'90^\circ', r' - \theta)'),
+            MathTex(r'cos\theta = sin(\frac{\pi}{2} - \theta)')
+        ).move_to([0, 8, 0]).scale(1.65)
+        plotting_plan = MathTex(r'sin(-\theta)', r' \longleftarrow \frac{\pi}{2}').move_to([0, 8, 0]).scale(1.65)
+        plotting_plan[1].set_opacity(0)
+        final_eq = MathTex(r'sin(', r'-\theta', r' + \frac{\pi}{2})').move_to([-3.65, 2.5, 0]).scale(1.25)
+        shift_arrow = MathTex(r'\frac{\pi}{2}\longrightarrow').move_to([1.5, 1, 0])
+        period_pointers = VGroup(
+            DashedLine([0, -1.8, 0], [0, 2, 0], color=YELLOW, dash_length=0.25).move_to(ax.c2p(PI, 0 , 0)),
+            DashedLine([0, -1.8, 0], [0, 2, 0], color=YELLOW, dash_length=0.25).move_to(ax.c2p(-PI, 0 , 0))
+        )
+
+        plot = ax.plot(np.sin, [-3*PI, 3*PI], color=RED)
+        plot_cos = ax.plot(np.cos, [-3*PI, 3*PI], color=RED)
+        plot_sin = ax.plot(np.sin, [-3*PI, 3*PI], color=BLUE)
+
+        self.play(Write(cos_eq[0]))
+        self.wait(2.5)
+        self.play(Transform(cos_eq[0], cos_eq[1])) 
+        self.wait(3)
+        self.play(cos_eq.animate.shift([0, 1.75, 0]).set_opacity(0), FadeIn(plotting_plan))
+        self.remove(cos_eq)
+        self.wait(1.5)
+        self.play(plotting_plan[1].animate.set_opacity(1))
+        self.wait(1.5)
+        MoveCamera([0, 0.5, 0])
+        self.remove(plotting_plan)
+        self.play(Write(final_eq))
+        self.play(Create(plot), Transform(labels[1], ax.get_y_axis_label(r'f(\theta) = sin(\theta)')), run_time=2)
+        self.wait(1)
+        self.play(plot.animate.flip(RIGHT), Transform(labels[1], ax.get_y_axis_label(r'f(\theta) = sin(-\theta)')), run_time=2)
+        self.wait(0.5)
+        self.play(Circumscribe(final_eq[1], fade_out=True), run_time=1.5)
+        self.wait(1.5)
+        self.play(Indicate(final_eq[2]), run_time=1.5)
+        self.wait(1.5)
+        self.play(Write(shift_arrow))
+        self.wait(1.5)
+        self.play(Unwrite(shift_arrow), Transform(plot, plot_cos), Transform(labels[1], ax.get_y_axis_label(r'f(\theta) = cos\theta')))
+        self.wait(1.5)
+        self.play(Transform(final_eq, MathTex(r'cos\theta').move_to([-3.65, 2.5, 0]).scale(1.25)))
         self.wait(2)
+        self.play(Create(plot_sin), Unwrite(final_eq), Transform(labels[1], ax.get_y_axis_label(r'f(\theta)')))
+        self.wait(2.5)
+        self.play(Create(period_pointers))
+        self.wait(2.5)
         
+        new_ax = Axes(
+            x_range=[-7*PI, 7*PI, PI],
+            y_range=[-1.5, 1.5, 1],
+            y_length=2,
+            tips=False
+        )
+        plots = VGroup(
+            new_ax.plot(np.sin, [-7*PI, 7*PI], color=BLUE),
+            new_ax.plot(np.cos, [-7*PI, 7*PI], color=RED)
+        )
+        self.play(Transform(ax, new_ax), FadeOut(VGroup(period_pointers, plot_cos, plot_sin, plot, labels)))
+        self.play(Create(plots), run_time=1.5)
+        self.wait(2.5)
+
+
 
