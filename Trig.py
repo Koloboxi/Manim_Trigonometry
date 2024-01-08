@@ -1465,5 +1465,170 @@ class Plots(MovingCameraScene):
         self.play(Create(plots), run_time=1.5)
         self.wait(2.5)
 
+class Tangent_Cotangent(MovingCameraScene):
+    def construct(self):
+        def NumbersToPIs(num_line, n):
+            for i in range(int(n/2)):
+                numberl = num_line.numbers[i]
+                numberr = num_line.numbers[-(i+1)]
+                numberl.become(Tex(
+                    '-', 
+                    '' if numberl.get_value() > -4 
+                    else str(int(n/2-i)), 
+                    r'$\pi$'
+                ).move_to(numberl.get_center()))
+                numberr.become(Tex(
+                    '' if numberr.get_value() < 4 
+                    else str(int(n/2-i)), 
+                    r'$\pi$'
+                ).move_to(numberr.get_center()))
+        def MoveCamera(point, zoom=1, t=1):
+            self.play(self.camera.frame.animate.move_to(point).set_height(8*zoom), run_time=t)
 
+        ax = Axes(
+            x_range=[-4, 4, PI],
+            y_range=[-1.8, 2, 1],
+            axis_config={
+                "tip_shape": StealthTip,
+                'include_numbers': True
+            },
+        )
+        scale_ax = Axes(
+            x_range=[-4.5*PI, 4.5*PI, PI],
+            y_range=[-1.8, 2, 1],
+            axis_config={
+                "tip_shape": StealthTip,
+                'include_numbers': True
+            },
+        )
+        
+        labels = ax.get_axis_labels(
+            MathTex(r"\theta"), MathTex(r"f(\theta)")
+        )
+        NumbersToPIs(scale_ax.get_axes()[0], 8)    
+        NumbersToPIs(ax.get_axes()[0], 2)    
+        self.camera.frame.move_to([0, 0.5, 0])
+        self.add(ax, labels)
+        
+        #tangent
+        sin_plot = ax.plot(np.sin, [-PI, PI], color=BLUE)
+        cos_plot = ax.plot(np.cos, [-PI, PI], color=RED)
+        
+
+        line_x = ValueTracker(0)
+        tan_line = always_redraw(lambda: VGroup(
+            DashedLine([0, -2.5, 0], [0, 2, 0], dash_length=0.25, dashed_ratio=0.6, color=YELLOW).move_to(ax.c2p(line_x.get_value(), 0, 0)),
+            DecimalNumber(np.tan(line_x.get_value())).move_to(ax.c2p(line_x.get_value(), 1.65, 0)).scale(0.75),
+            Tex('tan', color=YELLOW).move_to(ax.c2p(line_x.get_value(), -1.5, 0))
+        ))
+        tan_plot_positive = always_redraw(lambda: VGroup(
+            ax.plot(np.tan, [0, (line_x.get_value() if line_x.get_value() < 1.4 else 1.4)], color=YELLOW),
+            ax.plot(np.tan, [1.9, (1.9 if line_x.get_value() < 1.9 else line_x.get_value())], color=YELLOW)
+        ))
+        tan_plot_negative = always_redraw(lambda: VGroup(
+            ax.plot(np.tan, [0 if line_x.get_value() > 0 else (line_x.get_value() if line_x.get_value() > -1.2 else -1.2), 0], color=YELLOW),
+            ax.plot(np.tan, [-1.9 if line_x.get_value() > -1.9 else line_x.get_value(), -1.9], color=YELLOW)
+        ))
+
+        scale_tan_plot = VGroup(
+            *[scale_ax.plot(np.tan, [(-PI/2 + PI*(4-i))+0.35, (PI/2 + PI*(4-i))-0.35], color=YELLOW) for i in range(9)]
+        )
+
+        tick12PI = VGroup(
+            ax[0].get_tick(PI/2, 0.1),
+            MathTex(r'\frac{\pi}{2}').next_to(ax[0].get_tick(PI/2, 0.1).get_center(), UP).scale(0.85)
+        )
+        tick_12PI = VGroup(
+            ax[0].get_tick(-PI/2, 0.1),
+            MathTex(r'-\frac{\pi}{2}').next_to(ax[0].get_tick(-PI/2, 0.1).get_center(), UP).scale(0.85)
+        )
+        legend = VGroup(
+            Tex('sin', color=BLUE),
+            Tex('cos', color=RED).shift(DOWN)
+        ).move_to([5.5, -1, 0])
+        tan_eq = MathTex(r'tan\theta = \frac{sin\theta}{cos\theta}').move_to([-4, 2.5, 0])
+        
+        appr_infinity = Arrow(ax.c2p(1.35, 1.1, 0), ax.c2p(1.57, 3, 0))
+
+        self.wait(1.5)
+        self.play(Create(sin_plot), Create(cos_plot), Write(legend), run_time=1.5)
+        self.wait(.5)
+        self.play(Write(tan_eq))
+        self.wait(1)
+        self.play(Create(tan_line))
+        self.wait(2)
+        self.add(tan_plot_positive)
+        self.play(line_x.animate.set_value(PI), run_time=2.5)
+        tan_plot_positive.suspend_updating()
+        self.wait(1.5)
+        self.play(Create(appr_infinity))
+        self.wait(.5)
+        self.play(Flash(ax.c2p(PI/2, 0, 0)), Uncreate(appr_infinity), run_time=1.5)
+        self.wait(.5)
+        self.play(Circumscribe(tan_eq[0][10:14], fade_out=True), run_time=1.5)
+        self.wait(1.5)
+        self.play(Write(tick12PI))
+        self.wait(1)
+        self.add(tan_plot_negative)
+        self.play(line_x.animate.set_value(-PI), tan_eq.animate.move_to([[4, 2.5, 0]]), Write(tick_12PI), run_time=2)
+        self.wait(2.5)
+        self.play(FadeOut(VGroup(sin_plot, cos_plot, tick12PI, tick_12PI, legend, tan_eq, tan_plot_negative, tan_plot_positive, tan_line), run_time=0.7))
+        self.remove(ax)
+        self.add(scale_ax)
+        self.play(Create(scale_tan_plot))
+        self.wait(3.5)
+        self.play(Uncreate(scale_tan_plot))
+        self.add(ax)
+        self.remove(scale_ax)
+        self.wait(1.5)
+
+        #cotangent
+        np.cot = lambda x: 1/(np.tan(x))
+        tan_plot = VGroup(
+            *[ax.plot(np.tan, [(-PI/2 + PI*(1-i))+0.35, (PI/2 + PI*(1-i))-0.35], color=YELLOW) for i in range(3)]
+        )
+        cot_plot = VGroup(
+            *[ax.plot(np.cot, [(PI*(1-i))+0.35, (PI + PI*(1-i))-0.35], color="#38e1eb") for i in range(4)]
+        )
+        cot_eq = MathTex(r'cot\theta = \frac{cos\theta}{sin\theta}').move_to([-5, 2.65, 0])
+        cot_eq[0][0:3].set_color("#38e1eb")
+        appr_infinity = VGroup(
+            Arrow(ax.c2p(-PI/2, 0.5, 0), ax.c2p(-PI/2, 2, 0), color=YELLOW_D),
+            Arrow(ax.c2p(PI/2, 0.5, 0), ax.c2p(PI/2, 2, 0), color=YELLOW_D)
+        )
+        appr_infinity1 = VGroup(
+            Arrow(ax.c2p(-PI, 0.5, 0), ax.c2p(-PI, 2, 0), color=BLUE),
+            Arrow(ax.c2p(PI, 0.5, 0), ax.c2p(PI, 2, 0), color=BLUE),
+            Arrow(ax.c2p(0, 0.5, 0), ax.c2p(0, 2, 0), color=BLUE)
+        )
+        flash_ary = [
+            ax.c2p(-3/4*PI, 1, 0),
+            ax.c2p(PI/4, 1, 0),
+            ax.c2p(5/4*PI, 1, 0),
+            ax.c2p(-5/4*PI, -1, 0),
+            ax.c2p(-PI/4, -1, 0),
+            ax.c2p(3/4*PI, -1, 0),
+        ]
+
+        self.play(Create(tan_plot), Write(cot_eq))
+        self.wait(1)
+        self.play(Transform(cot_eq, MathTex(r'cot\theta = \frac{1}{tan\theta}').move_to([-5, 2.65, 0])))
+        self.play(cot_eq[0][0:4].animate.set_color("#38e1eb"), cot_eq[0][9:13].animate.set_color(YELLOW))
+        self.wait(1)
+        self.play(FadeOut(cot_eq), Transform(labels[1], ax.get_y_axis_label(r'f(\theta) = cot(\theta)')))
+        self.play(labels[1].animate.set_color("#38e1eb"), Create(cot_plot))
+        self.wait(1.5)
+        self.play(Create(appr_infinity))
+        self.play(Uncreate(appr_infinity))
+        self.wait(.5)
+        self.play(Flash(ax.c2p(-PI/2, 0, 0), color=YELLOW), Flash(ax.c2p(PI/2, 0, 0), color=YELLOW))
+        self.wait(1.2)
+        self.play(Flash(ax.c2p(-PI, 0, 0), color="#38e1eb"), Flash(ax.c2p(PI, 0, 0), color="#38e1eb"), Flash(ax.c2p(0, 0, 0), color="#38e1eb"))
+        self.wait(.5)
+        self.play(Create(appr_infinity1))
+        self.play(Uncreate(appr_infinity1))
+        self.wait(.5)
+        for i in range(6):
+            self.play(Circumscribe(Dot(flash_ary[i]), Circle, fade_out=True, color=WHITE), run_time=0.4)
+        self.wait(1.5)
 
