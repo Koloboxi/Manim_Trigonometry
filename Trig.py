@@ -1630,5 +1630,76 @@ class Tangent_Cotangent(MovingCameraScene):
         self.wait(.5)
         for i in range(6):
             self.play(Circumscribe(Dot(flash_ary[i]), Circle, fade_out=True, color=WHITE), run_time=0.4)
-        self.wait(1.5)
+        self.wait(2.5)
 
+class Secant_Cosecant(MovingCameraScene):
+     def construct(self):
+        def NumbersToPIs(num_line, n):
+            for i in range(int(n/2)):
+                numberl = num_line.numbers[i]
+                numberr = num_line.numbers[-(i+1)]
+                numberl.become(Tex(
+                    '-', 
+                    '' if numberl.get_value() > -4 
+                    else str(int(n/2-i)), 
+                    r'$\pi$'
+                ).move_to(numberl.get_center()))
+                numberr.become(Tex(
+                    '' if numberr.get_value() < 4 
+                    else str(int(n/2-i)), 
+                    r'$\pi$'
+                ).move_to(numberr.get_center()))
+        def MoveCamera(point, zoom=1, t=1):
+            self.play(self.camera.frame.animate.move_to(point).set_height(8*zoom), run_time=t)
+
+        ax = Axes(
+            x_range=[-8, 8, PI],
+            y_range=[-1.8, 2, 1],
+            axis_config={
+                "tip_shape": StealthTip,
+                'include_numbers': True
+            },
+        )
+        
+        labels = ax.get_axis_labels(
+            MathTex(r"\theta"), MathTex(r"f(\theta)")
+        ) 
+        NumbersToPIs(ax.get_axes()[0], 4)    
+        self.camera.frame.move_to([0, 0.5, 0])
+        self.add(ax, labels)
+        
+        #csc
+        np.csc = lambda x: 1/np.sin(x)
+        np.sec = lambda x: 1/np.cos(x)
+        sin_plot = ax.plot(np.sin, [-2*PI, 2*PI], color=BLUE)
+        cos_plot = ax.plot(np.cos, [-2.5*PI, 2.5*PI], color=RED)
+        legend = VGroup(
+            Tex('sin', color=BLUE).move_to([5.5, -1, 0]),
+            Tex('cos', color=RED).move_to([5.5, -1.75, 0]),
+            Tex('csc', color=GREEN).move_to([5.5, -2.5, 0]),
+            Tex('sec', color=YELLOW).move_to([5.5, -3.25, 0])
+        )
+        csc_eq = MathTex(r'csc\theta = \frac{1}{sin\theta}').move_to([-4.3, -2, 0])
+        csc_eq[0][0:3].set_color(GREEN)
+        csc_eq[0][7:10].set_color(BLUE)
+        sec_eq = MathTex(r'sec\theta = \frac{1}{cos\theta}').move_to([-4.5, -2, 0])
+        sec_eq[0][0:3].set_color(YELLOW)
+        sec_eq[0][7:10].set_color(RED)
+
+        csc_plot = VGroup(
+            *[ax.plot(np.csc, [PI+0.35 - PI*i, 2*PI-0.35 - PI*i], color=GREEN) for i in range(4)]
+        )
+        sec_plot = VGroup(
+            *[ax.plot(np.sec, [1.5*PI+0.35 - PI*i, 2.5*PI-0.35 - PI*i], color=YELLOW) for i in range(5)]
+        )
+
+        self.play(Write(VGroup(sin_plot, legend[0])))
+        self.wait(1.5)
+        self.play(Write(csc_eq))
+        self.wait(2)
+        self.play(Create(csc_plot), Write(legend[2]))
+        self.wait(3.5)
+        self.play(Transform(csc_eq, sec_eq), Create(cos_plot), Write(legend[1]))
+        self.wait(.5)
+        self.play(Create(sec_plot), Write(legend[3]), run_time=2)
+        self.wait(3)
