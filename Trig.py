@@ -1,15 +1,13 @@
 from typing import Callable
 from manim import *
-import math
-import numpy
+from manim_fonts import *
 from manim.animation.animation import DEFAULT_ANIMATION_LAG_RATIO, DEFAULT_ANIMATION_RUN_TIME
 from manim.mobject.mobject import Mobject
 from manim.scene.scene import Scene
-from manim.utils.rate_functions import smooth
 config.max_files_cached = -1
-
-
-##TRIANGLES
+# config.frame_width = 3.555
+# config.frame_height = 2
+ 
 class CongruentTriangles(Scene):
     def construct(self):
         triangle = Polygon(
@@ -221,11 +219,6 @@ class PythagoreanTheorem(Scene):
         self.play(pythagorean_equation.animate.move_to([0,0,0]).scale(1.5))
         self.play(Circumscribe(pythagorean_equation), run_time=2)
         self.wait(2)
-
-
-##UNIT CIRCLE
-# config.frame_width = 3.555
-# config.frame_height = 2
 
 class UnitCircle(MovingCameraScene):
     def construct(self):
@@ -629,11 +622,6 @@ class NormalVector2(MovingCameraScene):
         self.wait(1)
         self.play(Circumscribe(general_equation))
         self.wait(2)
-
-
-# config.frame_width = 3.555
-# config.frame_height = 2
-
 
 class Tangent(MovingCameraScene):
     def construct(self):
@@ -1131,8 +1119,6 @@ class TangentApplications(MovingCameraScene):
         self.wait(1)
         self.play(self.camera.frame.animate.move_to([-2, -1, 0]))
 
-
-#PLOTS
 class Radians(MovingCameraScene):
     def construct(self):
         circle = Circle(radius=3, color=BLUE, stroke_width=2)
@@ -1703,3 +1689,163 @@ class Secant_Cosecant(MovingCameraScene):
         self.wait(.5)
         self.play(Create(sec_plot), Write(legend[3]), run_time=2)
         self.wait(3)
+
+class Inverse_Functions_Preview(MovingCameraScene):
+    def construct(self):
+        text = Text('Обратные тригонометрические функции')
+        self.wait(1)
+        self.play(Write(text))
+        self.wait(2)
+        self.play(self.camera.frame.animate.shift([0, -5, 0]))
+
+class Inverse_Functions(MovingCameraScene):
+    def construct(self):
+        #proportionality
+        prop_eq = MathTex(r'B = \frac{1}{A}').scale(2)
+        self.wait(1)
+        self.play(Write(prop_eq))
+        self.wait(2)
+        self.play(prop_eq.animate.shift([15, 0, 0]))
+        self.remove(prop_eq)
+
+        #notation
+        f_eq = MathTex(r'f: X \rightarrow Y').scale(1.5)
+        f1_eq = MathTex(r'f^{-1}: Y \rightarrow X').scale(1.5).shift([0, -0.75, 0])
+        notation_note = MathTex(r'f^{-1} \neq \frac{1}{f}').scale(1.5)
+
+        self.wait(1.5)
+        self.play(Write(f_eq))
+        self.wait(2.5)
+        self.play(f_eq.animate.shift([0, 0.75, 0]), Write(f1_eq))
+        self.wait(2)
+        self.play(Circumscribe(f1_eq[0][1:3]), run_time=1.5)
+        self.wait(1)
+        self.play(Unwrite(f_eq), Transform(f1_eq, notation_note))
+        self.wait(2.5)
+
+        #example
+        f = VGroup(
+            MathTex('f(x)').scale(1.5).move_to([0, 2.2, 0]),
+
+            Text('a', color=RED).move_to([-2, 1.5, 0]),
+            Text('b', color=RED).move_to([-2, 0, 0]),
+            Text('c', color=RED).move_to([-2, -1.5, 0]),
+
+            Text('1', color=BLUE).move_to([2, 1.5, 0]),
+            Text('2', color=BLUE).move_to([2, 0, 0]),
+            Text('3', color=BLUE).move_to([2, -1.5, 0]),
+
+            Arrow([-1.75, 1.5, 0], [1.75, -1.5, 0], tip_shape=StealthTip),
+            Arrow([-1.75, 0, 0], [1.75, 1.5, 0], tip_shape=StealthTip),
+            Arrow([-1.75, -1.5, 0], [1.75, 0, 0], tip_shape=StealthTip)
+        )
+        f_1 = VGroup(
+            MathTex(r'f^{-1}(x)').scale(1.5).move_to([0, 2.2, 0]),
+
+            Text('a', color=RED).move_to([2, 1.5, 0]),
+            Text('b', color=RED).move_to([2, 0, 0]),
+            Text('c', color=RED).move_to([2, -1.5, 0]),
+
+            Text('1', color=BLUE).move_to([-2, 1.5, 0]),
+            Text('2', color=BLUE).move_to([-2, 0, 0]),
+            Text('3', color=BLUE).move_to([-2, -1.5, 0]),
+
+            Arrow([-1.75, 1.5, 0], [1.75, 0, 0], tip_shape=StealthTip),
+            Arrow([-1.75, 0, 0], [1.75, -1.5, 0], tip_shape=StealthTip),
+            Arrow([-1.75, -1.5, 0], [1.75, 1.5, 0], tip_shape=StealthTip)
+        ).shift([3, 0, 0])
+        self.play(Transform(f1_eq, f))
+        self.wait(2.5)
+        self.play(f1_eq.animate.shift([-3, 0, 0]), Write(f_1))
+        self.wait(2)
+        self.play(f1_eq.animate.shift([0, 6, 0]), f_1.animate.shift([0, 6, 0]))
+        self.remove(f1_eq, f_1)
+
+        #symmetric graphs
+        ax = Axes(
+            axis_config={
+                'include_ticks': False,
+                'tip_shape': StealthTip
+            },
+            y_range=[-2.5, 2.5],
+            x_range=[-2.5, 2.5]
+        )
+        f_plot = ax.plot(lambda x: x**3 - x, color=RED)
+        f1_plot = ax.plot(lambda x: x**3 - x, color=BLUE).flip(RIGHT+UP)
+        f_label = MathTex('f(x)').move_to([-2, 1, 0])
+        f1_label = MathTex(r'f^{-1}(x)').move_to([1.5, -2, 0])
+        diagonal = DashedLine([-10, -10, 0], [10, 10, 0], dash_length=0.4)
+
+        self.play(Create(ax), Create(f_plot), Write(f_label))
+        self.wait(.3)
+        self.play(Create(f1_plot), Write(f1_label), run_time=1)
+        self.wait(.3)
+        self.play(Create(diagonal))
+        self.wait(2.5)
+        self.play(FadeOut(VGroup(ax, f_plot, f_label, f1_plot, f1_label, diagonal)))
+        self.wait(1)
+
+        #trig
+        functions = VGroup(
+            MathTex(r'\sin^{-1}').move_to([-1.5, 1.2, 0]),
+            MathTex(r'\cos^{-1}').move_to([-1.5, 0, 0]),
+            MathTex(r'\tan^{-1}').move_to([-1.5, -1.2, 0]), 
+
+            MathTex(r'\csc^{-1}').move_to([1.5, 1.2, 0]),
+            MathTex(r'\sec^{-1}').move_to([1.5, 0, 0]),
+            MathTex(r'\cot^{-1}').move_to([1.5, -1.2, 0])
+        ).scale(1.3)
+        arcsin_eq = MathTex(r'arcsin(x)').scale(1.3)
+        sin_range = MathTex(r'sin\theta \in [-1, 1]').shift([0, -0.6, 0]).scale(1.3)
+        arcsin_ex = MathTex(r'arcsin(1)', r'= \frac{\pi}{2}').scale(1.3)
+
+        arc_fig = VGroup(
+            Arc(radius=4.5, start_angle=0, angle=PI/2, arc_center=[-6.5, -3, 0], color=BLUE),
+            Line([-6.5, -3, 0], [-6.5, 1.5, 0], stroke_width=2),
+            Line([-6.5, -3, 0], [-2, -3, 0], stroke_width=2)
+        )
+
+        self.play(Write(functions))
+        self.wait(2.5)
+        self.play(Transform(functions,
+                VGroup(
+                    MathTex(r'arcsin').move_to([-1.5, 1.2, 0]),
+                    MathTex(r'arccos').move_to([-1.5, 0, 0]),
+                    MathTex(r'arctan').move_to([-1.5, -1.2, 0]), 
+
+                    MathTex(r'arccsc').move_to([1.5, 1.2, 0]),
+                    MathTex(r'arcsec').move_to([1.5, 0, 0]),
+                    MathTex(r'arccot').move_to([1.5, -1.2, 0])
+            ).scale(1.3)
+        ))
+        self.wait(3)
+        self.play(FadeOut(functions), Write(arcsin_eq))
+        self.wait(2)
+        self.play(arcsin_eq.animate.shift([0, 0.6, 0]), Write(sin_range))
+        self.wait(1.5)
+        self.play(Transform(arcsin_eq, MathTex(r'arcsin(x), x \in [-1, 1]').scale(1.3).shift([0, 0.6, 0])))
+        self.wait(1.5)
+        self.play(arcsin_eq.animate.shift([0, -0.6, 0]), sin_range.animate.shift([0, -0.6, 0]).set_opacity(0))
+        self.remove(sin_range)
+        self.wait(.3)
+        self.play(Transform(arcsin_eq, MathTex(r'arcsin(x) = \theta').scale(1.3)))
+        self.wait(.6)
+        self.play(Transform(arcsin_eq, MathTex(r'arcsin(sin\theta) = \theta').scale(1.3)))
+        self.wait(2)
+        self.play(arcsin_eq.animate.shift([0, 1.2, 0]).set_opacity(0.4), FadeIn(arcsin_ex[0]))
+        self.wait(2)
+        self.play(Write(arcsin_ex[1]))
+        self.wait(2)
+        self.play(Circumscribe(arcsin_ex[1][1:4]), run_time=1)
+        self.play(Create(arc_fig))
+        self.wait(.3)
+        self.play(ShowPassingFlash(arc_fig[0].copy().set(color=YELLOW, stroke_width=15), time_width=1), run_time=1.5)
+        self.wait(2)
+        self.play(Indicate(arcsin_ex[0][0:3], scale_factor=1.1), run_time=1.5)
+        self.wait(1.5)
+        self.play(Uncreate(arc_fig), arcsin_ex.animate.shift([0, -0.6, 0]).set_opacity(0))
+        self.remove(arcsin_ex)
+        self.wait(.3)
+        self.play(arcsin_eq.animate.shift([0, -0.6, 0]).set_opacity(0))
+        self.remove(arcsin_eq)
+        self.wait(2)
