@@ -1849,3 +1849,303 @@ class Inverse_Functions(MovingCameraScene):
         self.play(arcsin_eq.animate.shift([0, -0.6, 0]).set_opacity(0))
         self.remove(arcsin_eq)
         self.wait(2)
+
+class Identities_Preview(Scene):
+    def construct(self):
+        t = Text('Тождества').scale(1.5)
+        self.play(Write(t))
+        self.wait(2)
+        self.play(t.animate.shift(DOWN).set_opacity(0))
+
+class Compound_Angles(MovingCameraScene):
+    def construct(self):
+        self.camera.frame.move_to([4, 3, 0])
+        dots = [[.5*6, .87*6, 0], [.74*6, .52*6, 0], [.5*6, 0.35*6, 0]]
+        figure = VGroup(
+            #Rays
+            Line([0, 0, 0], [6, 0, 0], stroke_width=2), 
+            Line([0, 0, 0], [.5*10, .87*10, 0], stroke_width=2),
+            Line([0, 0, 0], [.74*8, .52*8, 0], stroke_width=2),
+
+            #heights
+            Line(dots[0], [dots[0][0], 0, 0], stroke_width=2),
+            Line(dots[1], [dots[1][0], 0, 0], stroke_width=2),
+            Line(dots[0], dots[1], stroke_width=2),
+            Line([dots[0][0], dots[1][1], 0], dots[1], stroke_width=2)
+        )
+        notations = VGroup(
+            #Dots (0-6)
+            Tex('O').next_to([0, 0, 0], (LEFT+DOWN)*.25).scale(0.7),
+            Tex('P').next_to(dots[0], (UP+LEFT)*.25).scale(0.7),
+            Tex('Q').next_to(dots[1], RIGHT*.3+DOWN*.1).scale(0.7),
+            Tex('R').next_to([dots[0][0], dots[1][1], 0], LEFT*.3+DOWN*.1).scale(0.7),
+            Tex('A').next_to([dots[1][0], 0, 0], DOWN*.4).scale(0.7),
+            Tex('B').next_to([dots[0][0], 0, 0], DOWN*.4).scale(0.7),
+            Tex('C').next_to(dots[2], RIGHT*.3+DOWN*.2).scale(0.7),
+
+            #angles(7-10)
+            Tex(r'$\alpha$', color=YELLOW).move_to([1, 0.3, 0]),
+            Tex(r'$\beta$', color=BLUE_B).move_to([.8, .9, 0]),
+            Arc(0.8, 0, 35*DEGREES, color=YELLOW),
+            Arc(0.6, 35*DEGREES, 25*DEGREES, color=BLUE_B),
+
+            #squares
+            Square(.2, color=RED, stroke_width=1.8).align_to([dots[0][0], 0, 0], DOWN+RIGHT).set_z_index(-3),
+            Square(.2, color=RED, stroke_width=1.8).align_to(dots[1], DOWN+RIGHT).rotate(35*DEGREES, about_point=dots[1]).set_z_index(-3),
+            Square(.2, color=RED, stroke_width=1.8).align_to([dots[1][0], 0, 0], DOWN+RIGHT).set_z_index(-3),
+            Square(.2, color=RED, stroke_width=1.8).align_to([dots[0][0], dots[1][1], 0], DOWN+LEFT).set_z_index(-3),
+
+            #angles
+            Tex(r'$\alpha$', color=YELLOW).scale(0.8).next_to(dots[1], DOWN*0.35+LEFT*1.5),
+            Text('90°-α', font='Times New Roman').scale(0.4).next_to(dots[1], UP*0.4+LEFT),
+            Tex(r'$\alpha$', color=YELLOW).scale(0.85).next_to(dots[0], DOWN*2.1+RIGHT*.4),
+        )
+        lengths = VGroup(
+            Tex('1').next_to([.5*3, .87*3, 0], UP*0.87+LEFT),
+            MathTex(r'sin\beta').rotate(-55*DEGREES).move_to(figure[5].get_center() + (RIGHT+UP)*.25).scale(0.9),
+            MathTex(r'cos\beta').rotate(35*DEGREES).move_to(figure[2].get_center() + (LEFT+UP)*.25).scale(0.9),
+            MathTex(r'sin\alpha \cdot cos\beta').move_to(figure[4].get_center() + RIGHT).scale(0.75),
+            MathTex(r'cos\alpha \cdot sin\beta').move_to([.5*6-1.45, .87*6-1.05, 0]).scale(0.75)
+        )
+        eqs = VGroup(
+            MathTex(r'sin(\alpha + \beta)').scale(1.35).move_to(self.camera.frame_center),
+            MathTex(r'sin(\alpha + \beta) = \frac{PB}{OP} = PB').move_to([7.5, 5.2, 0]),
+            VGroup(
+                MathTex(r'\triangle OPQ:'),
+                MathTex(r'PQ = sin\beta').shift([1, -.75, 0]),
+                MathTex(r'OQ = cos\beta').shift([1, -1.5, 0]),
+                Rectangle(height=2.5, width=4, stroke_width=2, color=BLUE).shift([.75, -.75, 0])
+            ).move_to([8.5, 5, 0]),
+            VGroup(
+                MathTex(r'\triangle OQA:'),
+                MathTex(r'sin\alpha = \frac{AQ}{OQ}').shift([.75, -1, 0]),
+                Rectangle(height=2.5, width=4, stroke_width=2, color=BLUE).shift([.75, -.75, 0])
+            ).move_to([8.5, 1.75, 0]),
+            VGroup(
+                MathTex(r'\triangle PQR:'),
+                MathTex(r'\angle R = 90^\circ').shift([1, -.75, 0]),
+                MathTex(r'\angle Q = 90^\circ - \alpha').shift([1.4, -1.5, 0]),
+                MathTex(r'\angle P = 180^\circ - 90^\circ - 90^\circ + \alpha').shift([1.9, -2.25, 0]),
+                MathTex(r'cos\alpha = \frac{PR}{PQ} = \frac{PR}{sin\beta}').shift([1.4, -3.5, 0]),
+                Rectangle(height=4.25, width=5, stroke_width=2, color=BLUE).shift([1.4, -1.7, 0])
+            ).move_to([9.5, 2.5, 0]).scale(.75),
+            MathTex(r'PB = \sin\alpha\cos\beta + \cos\alpha\sin\beta').move_to([8.2, 1.75, 0]),
+            MathTex(r'sin(\alpha + \beta) = \sin\alpha\cos\beta + \cos\alpha\sin\beta').move_to([3.5, 6.2, 0])
+        )
+        eqs[5][0][6].set_color(YELLOW)    
+        eqs[5][0][10].set_color(BLUE_C) 
+        eqs[5][0][15].set_color(YELLOW)    
+        eqs[5][0][19].set_color(BLUE_C)
+
+        eqs[6][0][4].set_color(YELLOW)    
+        eqs[6][0][6].set_color(BLUE_C) 
+        eqs[6][0][12].set_color(YELLOW)    
+        eqs[6][0][16].set_color(BLUE_C) 
+        eqs[6][0][21].set_color(YELLOW)    
+        eqs[6][0][25].set_color(BLUE_C)            
+
+        
+        #misc things
+        compound_arc = Arc(1.6, 0, 60*DEGREES)
+        unit_brace = Brace(Line([0, 0, 0], dots[0]), figure[1].copy().rotate(PI/2, about_point=ORIGIN).get_vector(), 0.05)
+        eqs01 = MathTex(r'sin(\alpha + \beta) = PB').move_to([-.85, 6, 0])
+        eqs01[0][4].set_color(YELLOW)
+        eqs01[0][6].set_color(BLUE_B)
+        a_triangle_hl = Polygon([0, 0, 0], [dots[1][0], 0, 0], dots[1], stroke_width=7, color=GREEN_D)
+        aq_hl = Line(dots[1], [dots[1][0], 0, 0], color=YELLOW, stroke_width=7)
+        oq_hl = Line(dots[1], [0, 0, 0], color=YELLOW, stroke_width=7)
+        aq_copy = DashedLine(dots[1], [dots[1][0], 0, 0], stroke_width=5)
+        pr_brace = Brace(Line(dots[0], [dots[0][0], dots[1][1], 0]), LEFT, 0.2, 1)
+        cross_angle_hl = VGroup(
+            Line([dots[0][0], dots[1][1], 0], dots[1], color=YELLOW, stroke_width=7.5),
+            Line(dots[1], ORIGIN, color=YELLOW, stroke_width=7.5),
+            Line(ORIGIN, [dots[1][0], 0, 0], color=YELLOW, stroke_width=7.5)
+        )
+        pqr_arc = Arc(0.4, PI, -55*DEGREES, arc_center=dots[1], color=YELLOW)
+        pqr_hl = Polygon(dots[0], dots[1], [dots[0][0], dots[1][1], 0], color=YELLOW, stroke_width=6.5)
+        pr_brace = Brace(Line(dots[0], [dots[0][0], dots[1][1], 0]), LEFT, 0.1, 1)
+        rb_brace = Brace(Line([dots[0][0], dots[1][1], 0], [dots[0][0], 0, 0]), LEFT, 0.1, 1)
+
+
+        self.play(Write(eqs[0]))
+        self.wait(1.5)
+        self.play(eqs[0].animate.move_to([-1.5, 6, 0]).scale(1/1.35))
+        self.wait(.5)
+        self.play(Create(figure[0:3]), Write(notations[7:9]), Write(notations[0]))
+        self.wait(.2)
+        self.play(Create(notations[9:11]), eqs[0][0][4].animate.set_color(YELLOW), eqs[0][0][6].animate.set_color(BLUE_B))
+        self.wait(1)
+        self.play(Create(compound_arc))
+        self.wait(.8)
+        self.play(Uncreate(compound_arc))
+        self.wait(.5)
+        self.play(Write(unit_brace))
+        self.wait(.2)
+        self.play(Write(lengths[0]))
+        self.wait(.2)
+        self.play(FadeOut(unit_brace), Write(notations[1]))
+        self.wait(0.6)
+
+        self.play(Create(figure[3]), Write(notations[5]), Create(notations[11]), run_time=1.8)
+        self.wait(0.3)
+        self.play(ShowPassingFlash(figure[3].copy().set(stroke_width=10, color=YELLOW), 0.75), run_time=1.75)
+        self.play(Circumscribe(eqs[0]), run_time=1)
+        self.wait(.5)
+        self.play(Write(eqs[1]))
+        self.play(Circumscribe(eqs[1][0][11:13]))
+        self.play(Flash(lengths[0].get_center()))
+        self.wait(.6)
+        self.play(Transform(eqs[1], MathTex(r'PB = sin(\alpha + \beta)').move_to([7.5, 5.2, 0])))
+        self.wait(1)
+        self.play(Unwrite(eqs[1]), Transform(eqs[0], eqs01), run_time=1)
+        self.wait(2.5)
+
+        #OPQ
+        self.play(Create(figure[5]), Create(notations[12]), Write(notations[2]), Write(eqs[2][0]), run_time=1.5)
+        self.play(ShowPassingFlash(Polygon(ORIGIN, dots[0], dots[1], stroke_width=6, color=RED_C), time_width=0.8), run_time=2)
+        self.wait(1)
+        self.play(Circumscribe(lengths[0], color=BLUE_C, time_width=0.8, fade_out=True))
+        self.wait(.75)
+        self.play(Write(lengths[1]), Write(eqs[2][1]))
+        self.wait(.5)
+        self.play(ShowPassingFlash(Line(ORIGIN, dots[1], stroke_width=7.5), 0.65))
+        self.play(Write(lengths[2]), Write(eqs[2][2]))
+        self.wait(.5)
+        self.play(Create(eqs[2][3]))
+        self.wait(2)
+
+        #OQA
+        self.play(Create(figure[4]), Write(eqs[3][0]), Write(notations[4]), Create(notations[13]))
+        self.play(Create(a_triangle_hl))
+        self.play(Uncreate(a_triangle_hl))
+        self.wait(.2)
+        self.play(Write(eqs[3][1][0][0:5]))
+        self.wait(.6)
+        self.play(Create(aq_hl), Write(eqs[3][1][0][5:7]), run_time=.5)
+        self.play(Uncreate(aq_hl), run_time=1)
+        self.play(Create(oq_hl), Write(eqs[3][1][0][7:10]), run_time=.5)
+        self.play(Uncreate(oq_hl), run_time=1)
+        self.wait(.5)
+        self.play(Flash(lengths[2].get_center()))
+        self.wait(.2)
+        self.play(Transform(eqs[3][1], MathTex(r'sin\alpha = \frac{AQ}{cos\beta}').move_to(eqs[3][1].get_center())))
+        self.wait(1.2)
+        self.play(Transform(eqs[3][1], MathTex(r'AQ = sin\alpha \cdot cos\beta').move_to(eqs[3][1].get_center())))
+        self.wait(1.2)
+        self.play(Create(eqs[3][2]), Write(lengths[3]))
+        self.wait(1.5)
+        self.play(ShowPassingFlash(aq_hl.copy(), time_width=0.8))
+        self.add(aq_copy)
+        self.play(aq_copy.animate.shift((dots[0][0]-dots[1][0])*RIGHT), Circumscribe(eqs[0][9:11]))
+        self.wait(2)
+
+        #PQR
+        self.play(FadeIn(pr_brace))
+        self.wait(1)
+        self.play(Create(figure[6]), Write(notations[3]), Create(notations[14]), Write(notations[6]))
+        self.play(Uncreate(aq_copy), FadeOut(pr_brace))
+        self.wait(1)
+        
+        self.play(self.camera.frame.animate.set_height(7).shift(RIGHT*1.75+DOWN*0.4), eqs[2].animate.shift([3, 0, 0]).set_opacity(0), eqs[3].animate.shift([6, 0, 0]).set_opacity(0), eqs[0].animate.shift([9.5, -.75, 0]))
+        self.remove(eqs[2], eqs[3])
+        self.wait(.5)
+        self.play(Write(notations[15]))
+        self.play(Create(cross_angle_hl))
+        self.play(Uncreate(cross_angle_hl))
+        self.wait(1.5)
+        self.play(Create(pqr_arc))
+        self.play(Uncreate(pqr_arc))
+        self.play(Write(notations[16]))
+        self.wait(1.4)
+
+        self.play(Create(pqr_hl))
+        self.play(Uncreate(pqr_hl), Write(eqs[4][0]))
+        self.wait(1.3)
+        self.play(Write(eqs[4][1]), Indicate(notations[3]))
+        self.wait(.5)
+        self.play(Write(eqs[4][2]), Indicate(notations[2]))
+        self.wait(1.5)
+        self.play(Write(eqs[4][3]))
+        self.wait(.5)
+        self.play(Transform(eqs[4][3], MathTex(r'\angle P = \alpha').scale(.75).move_to(eqs[4][3].get_center()+.9*LEFT)))
+        self.play(Write(notations[17]))
+        self.wait(1.5)
+        self.play(Write(eqs[4][4]))
+        self.wait(.75)
+        self.play(ShowPassingFlash(Line(dots[0], [dots[0][0], dots[1][1], 0], color=YELLOW, stroke_width=7), time_width=.75))
+        self.wait(.75)
+        self.play(Transform(eqs[4][4], MathTex(r'PR = cos\alpha \cdot sin\beta').scale(.75).move_to(eqs[4][4].get_center()+.25*UP)))
+        self.wait(.5)
+        self.play(Create(eqs[4][5]), Write(lengths[4]), figure[1].animate.set_opacity(.45))
+        self.wait(1.5)
+        self.play(lengths[2].animate.set_opacity(0), figure[2].animate.set_opacity(.45), notations[6].animate.set_opacity(.45), eqs[4].animate.shift(RIGHT*4).set_opacity(0), notations[3].animate.shift([-.25, .25, 0]), lengths[0].animate.set_opacity(.45))
+        self.remove(eqs[4])
+        self.play(Write(VGroup(pr_brace, rb_brace)), lengths[3].animate.shift(LEFT*3.9), eqs[0].animate.shift(DOWN*2.25), Write(eqs[5][0][0:3]))
+        self.wait(2)
+        self.play(Write(eqs[5][0][3:11]), Circumscribe(lengths[3], fade_out=True), run_time=1.5)
+        self.wait(.5)
+        self.play(Write(eqs[5][0][11:20]), Circumscribe(lengths[4], fade_out=True), run_time=1.5)
+        self.wait(1.5)
+        self.play(self.camera.frame.animate.move_to([3, 3.5, 0]).set_height(8), Transform(VGroup(eqs[0], eqs[5]), eqs[6]), figure[1].animate.become(Line([0, 0, 0], [.5*6, .87*6, 0], stroke_width=2).set_opacity(.55)))
+        self.wait(.2)
+        self.play(Circumscribe(eqs[6], color=BLUE_A), run_time=1.5)
+        self.wait(2)
+
+class Compound_Angles_Analytic(MovingCameraScene):
+    def construct(self):
+        def SetColorToLetters(tex, ind=[4, 6, 12, 16, 21, 25], col=[YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C]):
+            for i in range(len(ind)):
+                tex[0][ind[i]].set_color(col[i])    
+            
+        eq_sinsum = MathTex(r'sin(\alpha + \beta) = \sin\alpha\cos\beta + \cos\alpha\sin\beta')
+        SetColorToLetters(eq_sinsum)
+
+        eq_sindif = MathTex(r'sin(\alpha - \beta)')
+        SetColorToLetters(eq_sindif, [4, 6], [YELLOW, BLUE_C])
+        eq_sindif.generate_target()
+        eq_sindif.target.become(MathTex(r'sin(\alpha + (-\beta))'))
+        SetColorToLetters(eq_sindif.target, [4, 8], [YELLOW, BLUE_C])
+
+
+        self.add(eq_sinsum)
+        self.wait()
+        self.play(eq_sinsum.animate.shift(UP).set_opacity(.75), GrowFromCenter(eq_sindif))
+        self.wait(2.5)
+        self.play(MoveToTarget(eq_sindif))
+        self.wait(3.5)
+
+        eq_sindif.generate_target()
+        eq_sindif.target.become(MathTex(r'sin(\alpha + (-\beta)) = \sin\alpha\cos(-\beta) + \cos\alpha\sin(-\beta)'))
+        SetColorToLetters(eq_sindif.target, [4, 8, 15, 21, 27, 33], [YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C])
+        self.play(MoveToTarget(eq_sindif))
+        self.wait(2)
+        self.play(Circumscribe(eq_sindif[0][16:23], fade_out=True), run_time=1.5)
+        self.wait(.5)
+
+        eq_sindif1 = MathTex(r'sin(\alpha + (-\beta)) = \sin\alpha\cos\beta + \cos\alpha\sin(-\beta)')
+        SetColorToLetters(eq_sindif1, [4, 8, 15, 19, 24, 30], [YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C])
+        self.play(TransformMatchingTex(eq_sindif, eq_sindif1))
+        self.wait(2)
+
+        eq_sindif2 = MathTex(r'sin(\alpha + (-\beta)) = \sin\alpha\cos\beta - \cos\alpha\sin\beta')
+        SetColorToLetters(eq_sindif2, [4, 8, 15, 19, 24, 28], [YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C])
+        self.play(Circumscribe(eq_sindif1[0][25:32], fade_out=True), run_time=2)
+        self.play(Flash(eq_sindif1[0][20].get_center()))
+        self.play(TransformMatchingTex(eq_sindif1, eq_sindif2))
+        self.wait(2)
+
+        eq_sindif2.generate_target()
+        eq_sindif2.target.become(MathTex(r'sin(\alpha - \beta) = \sin\alpha\cos\beta - \cos\alpha\sin\beta')).shift(DOWN)
+        SetColorToLetters(eq_sindif2.target, [5, 7, 14, 18, 24, 28], [YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C])
+        self.play(MoveToTarget(eq_sindif2), eq_sinsum.animate.set_opacity(1).shift(DOWN))
+        self.wait(2)
+        self.play(Indicate(eq_sinsum[0][5], color=RED), Indicate(eq_sinsum[0][17], color=RED))
+        self.play(Indicate(eq_sindif2[0][6], color=BLUE), Indicate(eq_sindif2[0][19], color=BLUE))
+        self.wait(1.5)
+
+        eq_general = MathTex(r'sin(\alpha \pm \beta) = \sin\alpha\cos\beta \pm \cos\alpha\sin\beta')
+        SetColorToLetters(eq_general)
+        self.play(eq_sindif2.animate.shift(UP), FadeIn(eq_general), run_time=.75)
+        self.remove(eq_sindif2, eq_sinsum)
+        self.wait(2)
+        
