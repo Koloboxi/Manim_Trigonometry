@@ -2096,17 +2096,18 @@ class Compound_Angles_Analytic(MovingCameraScene):
         def SetColorToLetters(tex, ind=[4, 6, 12, 16, 21, 25], col=[YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C]):
             for i in range(len(ind)):
                 tex[0][ind[i]].set_color(col[i])    
-            
-        eq_sinsum = MathTex(r'sin(\alpha + \beta) = \sin\alpha\cos\beta + \cos\alpha\sin\beta')
+        
+        #sin
+        eq_sinsum = MathTex(r'\sin(\alpha + \beta) = \sin\alpha\cos\beta + \cos\alpha\sin\beta')
         SetColorToLetters(eq_sinsum)
 
-        eq_sindif = MathTex(r'sin(\alpha - \beta)')
+        eq_sindif = MathTex(r'\sin(\alpha - \beta)')
         SetColorToLetters(eq_sindif, [4, 6], [YELLOW, BLUE_C])
         eq_sindif.generate_target()
-        eq_sindif.target.become(MathTex(r'sin(\alpha + (-\beta))'))
+        eq_sindif.target.become(MathTex(r'\sin(\alpha + (-\beta))'))
         SetColorToLetters(eq_sindif.target, [4, 8], [YELLOW, BLUE_C])
 
-
+        
         self.add(eq_sinsum)
         self.wait()
         self.play(eq_sinsum.animate.shift(UP).set_opacity(.75), GrowFromCenter(eq_sindif))
@@ -2115,19 +2116,19 @@ class Compound_Angles_Analytic(MovingCameraScene):
         self.wait(3.5)
 
         eq_sindif.generate_target()
-        eq_sindif.target.become(MathTex(r'sin(\alpha + (-\beta)) = \sin\alpha\cos(-\beta) + \cos\alpha\sin(-\beta)'))
+        eq_sindif.target.become(MathTex(r'\sin(\alpha + (-\beta)) = \sin\alpha\cos(-\beta) + \cos\alpha\sin(-\beta)'))
         SetColorToLetters(eq_sindif.target, [4, 8, 15, 21, 27, 33], [YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C])
         self.play(MoveToTarget(eq_sindif))
         self.wait(2)
         self.play(Circumscribe(eq_sindif[0][16:23], fade_out=True), run_time=1.5)
         self.wait(.5)
 
-        eq_sindif1 = MathTex(r'sin(\alpha + (-\beta)) = \sin\alpha\cos\beta + \cos\alpha\sin(-\beta)')
+        eq_sindif1 = MathTex(r'\sin(\alpha + (-\beta)) = \sin\alpha\cos\beta + \cos\alpha\sin(-\beta)')
         SetColorToLetters(eq_sindif1, [4, 8, 15, 19, 24, 30], [YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C])
         self.play(TransformMatchingTex(eq_sindif, eq_sindif1))
         self.wait(2)
 
-        eq_sindif2 = MathTex(r'sin(\alpha + (-\beta)) = \sin\alpha\cos\beta - \cos\alpha\sin\beta')
+        eq_sindif2 = MathTex(r'\sin(\alpha + (-\beta)) = \sin\alpha\cos\beta - \cos\alpha\sin\beta')
         SetColorToLetters(eq_sindif2, [4, 8, 15, 19, 24, 28], [YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C])
         self.play(Circumscribe(eq_sindif1[0][25:32], fade_out=True), run_time=2)
         self.play(Flash(eq_sindif1[0][20].get_center()))
@@ -2135,7 +2136,7 @@ class Compound_Angles_Analytic(MovingCameraScene):
         self.wait(2)
 
         eq_sindif2.generate_target()
-        eq_sindif2.target.become(MathTex(r'sin(\alpha - \beta) = \sin\alpha\cos\beta - \cos\alpha\sin\beta')).shift(DOWN)
+        eq_sindif2.target.become(MathTex(r'\sin(\alpha - \beta) = \sin\alpha\cos\beta - \cos\alpha\sin\beta')).shift(DOWN)
         SetColorToLetters(eq_sindif2.target, [5, 7, 14, 18, 24, 28], [YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C])
         self.play(MoveToTarget(eq_sindif2), eq_sinsum.animate.set_opacity(1).shift(DOWN))
         self.wait(2)
@@ -2143,9 +2144,116 @@ class Compound_Angles_Analytic(MovingCameraScene):
         self.play(Indicate(eq_sindif2[0][6], color=BLUE), Indicate(eq_sindif2[0][19], color=BLUE))
         self.wait(1.5)
 
-        eq_general = MathTex(r'sin(\alpha \pm \beta) = \sin\alpha\cos\beta \pm \cos\alpha\sin\beta')
+        eq_general = MathTex(r'\sin(\alpha \pm \beta) = \sin\alpha\cos\beta \pm \cos\alpha\sin\beta')
         SetColorToLetters(eq_general)
-        self.play(eq_sindif2.animate.shift(UP), FadeIn(eq_general), run_time=.75)
+        self.play(eq_sindif2.animate.shift(UP), FadeIn(eq_general), run_time=.66)
         self.remove(eq_sindif2, eq_sinsum)
         self.wait(2)
+        self.play(eq_general.animate.shift(DOWN*1.5).set_opacity(.66))
         
+        #cos
+        eq_cossum = MathTex(r'\cos({{\alpha}} + {{\beta}})').set_color_by_tex_to_color_map({r'\alpha': YELLOW, r'\beta': BLUE_C})
+        target = MathTex(r'\sin({{90^\circ - }}({{\alpha}} + {{\beta}}))').set_color_by_tex_to_color_map({r'\alpha': YELLOW, r'\beta': BLUE_C})
+        rectangle = Rectangle(YELLOW, .75, 2).shift(LEFT*.1)
+
+        
+        self.play(Write(eq_cossum))
+        self.wait(1.5)
+        self.play(TransformMatchingTex(
+            VGroup(eq_cossum, VGroup(MathTex(r'90^\circ -'), MathTex(r'()')).arrange().shift(UP)), 
+            target,
+            transform_mismatches=True
+        ))
+        eq_cossum = target
+        target = MathTex(r'\sin((90^\circ - {{\alpha}}) - {{\beta}})').set_color_by_tex_to_color_map({r'\alpha': YELLOW, r'\beta': BLUE_C})
+        self.wait(2.5)
+
+        self.play(TransformMatchingTex(
+            eq_cossum, 
+            target
+        ))
+        eq_cossum = target
+        self.wait(2.5)
+
+        self.play(FadeIn(rectangle))
+        self.wait(.5)
+        self.play(Transform(rectangle, SurroundingRectangle(eq_cossum[3])))
+        self.wait(.65)
+        self.play(FadeOut(rectangle))
+        self.wait(.75)
+
+        target = MathTex(r'\sin((90^\circ - {{\alpha}}) - {{\beta}}) = \sin(90^\circ - {{\alpha}})\cos{{\beta}} - \cos(90^\circ - {{\alpha}})\sin{{\beta}}').set_color_by_tex_to_color_map({r'\alpha': YELLOW, r'\beta': BLUE_C})
+        self.play(Transform(eq_cossum, target))
+        self.wait(2.2)
+
+        sin_brace = VGroup(Brace(VGroup(eq_cossum[4][2], eq_cossum[6][0]), UP, 0.05))
+        sin_brace.add(MathTex(r'cos{{\alpha}}').set_color_by_tex(r'\alpha', YELLOW).next_to(sin_brace[0].get_center(), UP))
+        cos_brace = VGroup(Brace(VGroup(eq_cossum[8][1], eq_cossum[10][0]), UP, 0.05))
+        cos_brace.add(MathTex(r'sin{{\alpha}}').set_color_by_tex(r'\alpha', YELLOW).next_to(cos_brace[0].get_center(), UP))
+        target = MathTex(r'\sin((90^\circ - {{\alpha}}) - {{\beta}}) = \cos{{\alpha}}\cos{{\beta}} - \sin{{\alpha}}\sin{{\beta}}').set_color_by_tex_to_color_map({r'\alpha': YELLOW, r'\beta': BLUE_C})
+        self.play(FadeIn(sin_brace[0]))
+        self.wait(.5)
+        self.play(FadeIn(sin_brace[1]))
+        self.wait(1)
+        self.play(FadeIn(cos_brace))
+        self.wait(1)
+        self.play(Transform(eq_cossum, target), FadeOut(VGroup(cos_brace, sin_brace)))
+        self.wait(1)
+
+        target = MathTex(r'\cos({{\alpha}} + {{\beta}}) = \cos{{\alpha}}\cos{{\beta}} - \sin{{\alpha}}\sin{{\beta}}').set_color_by_tex_to_color_map({r'\alpha': YELLOW, r'\beta': BLUE_C})
+        self.play(Transform(eq_cossum, target))
+        self.wait(1.5)
+        self.play(Circumscribe(eq_cossum), run_time=1.5)
+        self.wait(.2)
+        
+
+        eq_cosdif = MathTex(r'\cos({{\alpha}} - {{\beta}}) = \cos{{\alpha}}\cos{{\beta}} + \sin{{\alpha}}\sin{{\beta}}').set_color_by_tex_to_color_map({r'\alpha': YELLOW, r'\beta': BLUE_C})
+        cos_brace = VGroup(Brace(VGroup(eq_cosdif[6][0], eq_cosdif[7][0]), UP, 0.05, 0.5))
+        cos_brace.add(MathTex(r'cos(-{{\beta}})').set_color_by_tex(r'\beta', BLUE_C).next_to(cos_brace[0].get_center(), UP))
+        sin_brace = VGroup(Brace(VGroup(eq_cosdif[10][0], eq_cosdif[11][0]), UP, 0.05, 0.5))
+        sin_brace.add(MathTex(r'sin(-{{\beta}})').set_color_by_tex(r'\beta', BLUE_C).next_to(sin_brace[0].get_center(), UP))
+        
+        self.play(eq_general.animate.shift(DOWN*1.5).set_opacity(0.33), eq_cossum.animate.shift(DOWN*1.5).set_opacity(0.67), GrowFromCenter(eq_cosdif))
+        self.wait(2)
+        self.play(FadeIn(cos_brace))
+        self.wait(1)
+        self.play(FadeIn(sin_brace))
+        self.play(Flash(eq_cosdif[8][0].get_center()))
+        self.play(FadeOut(VGroup(cos_brace, sin_brace)))
+        self.wait(1)
+
+        eq_general_cos = MathTex(r'\cos({{\alpha}} \pm {{\beta}}) = \cos{{\alpha}}\cos{{\beta}} \mp \sin{{\alpha}}\sin{{\beta}}').set_color_by_tex_to_color_map({r'\alpha': YELLOW, r'\beta': BLUE_C})
+        self.play(eq_general.animate.shift(UP*1.5).set_opacity(0.67), eq_cossum.animate.shift(UP*1.5).set_opacity(0), FadeIn(eq_general_cos))
+        self.remove(eq_cossum, eq_cosdif)
+        self.wait(.5)
+        self.play(eq_general_cos.animate.shift(.5*UP), eq_general.animate.shift(1*UP).set_opacity(1))
+        self.wait(3)
+        
+        #tan
+        eq_general_tan = MathTex(r'\tan(\alpha \pm \beta) = \frac{\sin\alpha\cos\beta \pm \cos\alpha\sin\beta}{\cos\alpha\cos\beta \mp \sin\alpha\sin\beta}')
+        SetColorToLetters(eq_general_tan, [4, 6, 12, 16, 21, 25, 30, 34, 39, 43], [YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C])
+        self.play(TransformMatchingShapes(VGroup(eq_general_cos, eq_general), eq_general_tan))
+        self.wait(2)
+
+        division_ex = MathTex(r':\cos{{\alpha}}\cos{{\beta}}').set_color_by_tex_to_color_map({r'\alpha': YELLOW, r'\beta': BLUE_C}).move_to([5, 0, 0]).set_opacity(0.5)
+        self.play(GrowFromCenter(division_ex), eq_general_tan.animate.shift(LEFT))
+        self.wait(1.75)
+
+        target = MathTex(r'\tan(\alpha \pm \beta) = \frac{\frac{\sin\alpha\cos\beta}{\cos\alpha\cos\beta} \pm \frac{\cos\alpha\sin\beta}{\cos\alpha\cos\beta}}{\frac{\cos\alpha\cos\beta}{\cos\alpha\cos\beta} \mp \frac{\sin\alpha\sin\beta}{\cos\alpha\cos\beta}}')
+        SetColorToLetters(target, [4, 6, 12, 16, 21, 25, 30, 34, 39, 43, 48, 52, 57, 61, 66, 70, 75, 79], [YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C,YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C,YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C])
+        self.play(TransformMatchingShapes(VGroup(eq_general_tan, division_ex), target))
+        eq_general_tan = target
+        self.wait(1.75)
+
+        target = MathTex(r'\tan(\alpha \pm \beta) = \frac{\frac{\sin\alpha}{\cos\alpha} \pm \frac{\sin\beta}{\cos\beta}}{1 \mp \frac{\sin\alpha\sin\beta}{\cos\alpha\cos\beta}}')
+        SetColorToLetters(target, [4, 6, 12, 17, 22, 27, 34, 38, 43, 47], [YELLOW, BLUE_C, YELLOW, YELLOW, BLUE_C, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C])
+        self.play(TransformMatchingShapes(eq_general_tan, target))
+        eq_general_tan = target
+        self.wait(.5)
+
+        target = MathTex(r'\tan(\alpha \pm \beta) = \frac{\tan\alpha \pm \tan\beta}{1 \mp \tan\alpha\tan\beta')
+        SetColorToLetters(target, [4, 6, 12, 17, 24, 28], [YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C])
+        self.play(Transform(eq_general_tan, target))
+        self.wait(3)
+
+
