@@ -2256,4 +2256,32 @@ class Compound_Angles_Analytic(MovingCameraScene):
         self.play(Transform(eq_general_tan, target))
         self.wait(3)
 
+class Identities_Outro(Scene):
+    def construct(self):
+        def SetColorToLetters(tex, ind=[4, 6, 12, 16, 21, 25], col=[YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C]):
+            for i in range(len(ind)):
+                tex[0][ind[i]].set_color(col[i])   
+        label = Text('Тождества').move_to([0, 2.5, 0])
+
+        half_angle = VGroup(MathTex(r'\sin\frac{\theta}{2} = \pm \sqrt{\frac{1-\cos\theta}{2}}'))
+        half_angle.add(SurroundingRectangle(half_angle[0], color=BLUE_D, stroke_width=2))
+        power_reducing = VGroup(MathTex(r'\sin^2\theta = \frac{1 - \cos 2\theta}{2}'))
+        power_reducing.add(SurroundingRectangle(power_reducing[0], color=BLUE_D, stroke_width=2))
+
+        prev = MathTex(r'\tan(\alpha \pm \beta) = \frac{\tan\alpha \pm \tan\beta}{1 \mp \tan\alpha\tan\beta')
+        SetColorToLetters(prev, [4, 6, 12, 17, 24, 28], [YELLOW, BLUE_C, YELLOW, BLUE_C, YELLOW, BLUE_C])
+        
+
+        eqs = VGroup()
+        eqs.add(half_angle, power_reducing)
+        eqs.arrange()
+
+        self.wait()
+        self.play(Write(label))
+        self.wait()
+        self.play(Write(eqs[0][0]), Create(eqs[0][1]))
+        self.play(Write(eqs[1][0]), Create(eqs[1][1]))
+        self.wait(1)
+        self.play(ShrinkToCenter(eqs), GrowFromCenter(prev))
+        self.wait(3)
 
