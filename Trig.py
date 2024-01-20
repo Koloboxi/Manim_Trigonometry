@@ -2285,3 +2285,163 @@ class Identities_Outro(Scene):
         self.play(ShrinkToCenter(eqs), GrowFromCenter(prev))
         self.wait(3)
 
+class Sine_Law(MovingCameraScene):
+    def construct(self):
+        self.camera.frame.move_to([4, 1, 0])
+        a = [0, 0, 0]
+        b = [2, 3, 0]
+        c = [8, 0, 0]
+        h = [2, 0, 0]
+
+        b_ = [1, 6, 0]
+        c_ = [3, 0, 0]
+        notations_ = VGroup(
+            Tex('A').next_to(a, (LEFT+DOWN)*.5),
+            Tex('C').next_to(c_, (DOWN+RIGHT)*.5),
+            Star(outer_radius=.35, color=YELLOW, fill_opacity=.9).next_to(b_, LEFT*.65),
+            Tex('a').next_to(Line(c_, b_).get_center(), (UP+RIGHT)*.5),
+            Tex('b').next_to(Line(a, c_).get_center(), DOWN*.5),
+            Tex('c').next_to(Line(a, b_).get_center(), (UP+LEFT)*.5),
+        )
+        triangle = Polygon(a, b, c)
+        bh = DashedLine(b, h, dashed_ratio=.75, dash_length=.2, color=WHITE, stroke_width=3)
+
+        notations = VGroup(
+            Tex('A').next_to(a, (LEFT+DOWN)*.5),
+            Tex('C').next_to(c, (DOWN+RIGHT)*.5),
+            Tex('B').next_to(b, (RIGHT+UP)*.5),
+
+            Tex('a').next_to(Line(c, b).get_center(), (UP+RIGHT)*.5),
+            Tex('b').next_to(Line(a, c).get_center(), DOWN*.5),
+            Tex('c').next_to(Line(a, b).get_center(), (UP+LEFT)*.5),
+
+            Tex('H').next_to(h, DOWN*.5),
+            Tex('h').next_to(bh.get_center(), RIGHT*.5),
+            Square(.2, color=RED, stroke_width=2).align_to(h, DOWN+LEFT).set_z_index(-3)
+        )
+
+        #misc
+        arrows = VGroup(
+            Arrow(a, Line(b, c).get_center(), buff=0.5, stroke_width=3),
+            Arrow(b, Line(a, c).get_center(), buff=0.5, stroke_width=3),
+            Arrow(c, Line(b, a).get_center(), buff=0.5, stroke_width=3)
+        ).set_opacity(0.6)
+        abh_highlight = Polygon(a, b, h, color=YELLOW, stroke_width=8).set_z_index(3)
+        cbh_highlight = Polygon(c, b, h, color=YELLOW, stroke_width=8).set_z_index(3)
+
+        abh_cover = Polygon(a, b, h, color=GREEN).set_z_index(3)
+        cbh_cover = Polygon(c, b, h, color=GREEN).set_z_index(3)
+
+        b_sector = Sector(1, 0, color=YELLOW, fill_opacity=0.6, arc_center=b, start_angle=-26.5*DEGREES, angle=-97.1*DEGREES)
+        b_brace = Brace(Line(a, c), DOWN, 0.15, 1)
+        a_sector = Sector(0.8, 0, color=YELLOW, fill_opacity=0.6, angle=56.3*DEGREES)
+        c_sector = Sector(0.6, 0, color=YELLOW, fill_opacity=0.6, angle=-26.6*DEGREES, arc_center=c, start_angle=PI)
+        c_brace = Brace(Line(a, b), UP*.67+LEFT, 0.15, 1)
+
+        a_sector_ = Sector(0.8, 0, color=YELLOW, fill_opacity=0.6, angle=80.5*DEGREES)
+        c_sector_ = Sector(0.8, 0, color=YELLOW, fill_opacity=0.6, angle=-71.56*DEGREES, arc_center=c_, start_angle=PI)
+        b_sector_ = Sector(0.8, 0, color=YELLOW, fill_opacity=0.6, angle=-27.94*DEGREES, arc_center=b_, start_angle=-71.56*DEGREES)
+        ac = Arrow(a, c_)
+
+        #eqs
+        eq_abh = MathTex(r'\triangle ABH, \\', r'{{sinA}} = \frac{h}{c}').move_to([2, -2.5, 0])
+        eq_cbh = MathTex(r'\triangle CBH, \\', r'sinC = \frac{h}{a}').move_to([6, -2.5, 0])
+        eq_abh_target = MathTex(r'\triangle ABH, \\', r'h = {{sinA \cdot c}}').move_to([2, -2.5, 0])
+        eq_cbh_target = MathTex(r'\triangle CBH, \\', r'h = {{sinC \cdot a}}').move_to([6, -2.5, 0])
+        eq_general = MathTex(r'{{sinA \cdot c}} = {{sinC \cdot a}}').move_to([4, -2, 0])
+        target = MathTex(r'\frac{sin A}{a} = \frac{sin C}{c}', r'= \frac{sin B}{b}').move_to([4, -2, 0])
+        eq_value = MathTex(r'\frac{<1}{<1}', r'= \frac{\ll1}{\ll1} =', r'\frac{\sim 1}{\sim 1}').move_to([9, 3, 0])
+        label = Text('Теорема синусов').move_to([6, 5, 0])
+        
+
+        self.wait()
+        self.play(Create(triangle), Write(notations[0:3]))
+        self.wait()
+        self.play(Create(arrows), Write(notations[3:6]))
+        self.wait(1)
+        self.play(FadeOut(arrows))
+        self.wait(1.5)
+        self.play(Create(bh), Write(notations[6:10]))
+        self.wait(1.25)
+        self.play(ShowPassingFlash(abh_highlight, 0.75), ShowPassingFlash(cbh_highlight, 0.75), run_time=1.5)
+        self.wait(.75)
+        self.play(FadeIn(abh_cover), self.camera.frame.animate.move_to([6, -.25, 0]), Write(eq_abh[0]))
+        self.wait(.4)
+        self.play(Indicate(notations[0]), GrowFromCenter(eq_abh[1]))
+        self.wait(.75)
+        self.play(Flash(notations[7]))
+        self.play(Flash(notations[5]))
+        self.play(Write(eq_abh[2]))
+        self.wait(2)
+
+        self.play(Transform(abh_cover, cbh_cover), Write(eq_cbh[0]))
+        self.wait(.4)
+        self.play(Write(eq_cbh[1]))
+        self.wait(1.75)
+
+        self.play(TransformMatchingShapes(eq_abh, eq_abh_target))
+        self.play(TransformMatchingShapes(eq_cbh, eq_cbh_target))
+        self.wait(1.75)
+        self.play(TransformMatchingShapes(VGroup(eq_abh_target, eq_cbh_target), eq_general), FadeOut(abh_cover))
+        self.wait(1.75)
+        self.play(TransformMatchingShapes(eq_general, target[0]))
+        eq_general = target
+        self.wait(2.75)
+        self.play(Write(eq_general[1]))
+        self.wait(1.5)
+        self.play(self.camera.frame.animate.move_to([6, 2.5, 0]), eq_general.animate.move_to([9, 3, 0]), FadeOut(VGroup(bh, notations[6:9])))
+        self.wait(2.5)
+        self.play(FadeIn(b_sector))
+        self.wait(1.75)
+        self.play(eq_general.animate.shift(UP*1.45), GrowFromCenter(eq_value[2]))
+        self.wait(.1)
+        self.play(Indicate(eq_value[2][0:2]))
+        self.wait(1)
+        self.play(FadeIn(b_brace), notations[4].animate.shift(DOWN*.45))
+        self.play(Indicate(eq_value[2][3:5]))
+        self.wait(.2)
+        self.play(FadeOut(b_brace), notations[4].animate.shift(UP*.45))
+        self.wait(1)
+        self.play(FadeIn(a_sector))
+        self.play(Write(eq_value[0]))
+        self.wait(.5)
+        self.play(ShowPassingFlash(Line(b, c, color=YELLOW, stroke_width=7), time_width=.75), run_time=2)
+        self.wait(1.25)
+        self.play(Write(eq_value[1]), FadeIn(c_sector))
+        self.wait(.2)
+        self.play(FadeIn(c_brace), notations[5].animate.shift(.25*(UP+LEFT*.667)))
+        self.wait(.6)
+        self.play(FadeOut(c_brace), notations[5].animate.shift(.25*(DOWN+RIGHT*.667)))
+        self.wait(.75)
+        self.play(Circumscribe(eq_value, fade_out=True, time_width=.75, color=BLUE), run_time=1.75)
+        self.wait(.3)
+        self.play(eq_value.animate.shift(DOWN).set_opacity(0), eq_general.animate.shift(DOWN*1.5))
+        self.remove(eq_value)
+        self.wait(.5)
+        self.play(Circumscribe(eq_general, fade_out=True), run_time=1.5)
+        self.play(Write(label))
+        self.wait(2)
+
+        #triangulation
+        self.play(Transform(triangle, Polygon(a, b_, c_)), TransformMatchingShapes(notations, notations_), FadeOut(VGroup(a_sector, b_sector, c_sector)), label.animate.shift(RIGHT*3).set_opacity(0), self.camera.frame.animate.shift(LEFT*1.25), eq_general.animate.shift(LEFT*2+UP))
+        self.remove(label)
+        self.wait(2.5)
+        self.play(Indicate(notations_[0]), Flash(ORIGIN))
+        self.wait(.4)
+        self.play(GrowFromPoint(a_sector_, ORIGIN), eq_general[0][0:4].animate.set_color(YELLOW))
+        self.wait(1.25)
+        self.play(GrowArrow(ac), eq_general[1][6].animate.set_color(YELLOW))
+        self.wait(.5)
+        self.play(Flash(c_), Indicate(notations_[1]), GrowFromPoint(c_sector_, c_), FadeOut(ac), eq_general[0][7:11].animate.set_color(YELLOW))
+        self.wait(1.25)
+        self.play(GrowFromPoint(b_sector_, b_), Flash(b_), eq_general[1][1:5].animate.set_color(YELLOW))
+        self.wait(.25)
+        self.play(Circumscribe(eq_general[1][1:7], fade_out=True, color=BLUE_B), run_time=2)
+        self.wait(.25)
+        self.play(Flash(eq_general[0][5]), Flash(eq_general[0][12]), eq_general[0][5].animate.set_color(BLUE_B), eq_general[0][12].animate.set_color(BLUE_B))
+        self.wait()
+
+        label = Text('Триангуляция').next_to(eq_general, DOWN*4)
+        self.play(GrowFromCenter(label))
+        self.wait(3)
+
