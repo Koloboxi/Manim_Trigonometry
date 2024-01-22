@@ -2445,3 +2445,336 @@ class Sine_Law(MovingCameraScene):
         self.play(GrowFromCenter(label))
         self.wait(3)
 
+class Intersecting_Chords(MovingCameraScene):
+    def construct(self):
+        cam = self.camera.frame
+
+        a = [.62, 1.90, 0]
+        b = [.40, -1.96, 0]
+        c = [-1.06, 1.70, 0]
+        d = [-.76, -1.84, 0]
+        o = [-.22, -.38, 0]
+
+        circle = Circle(radius=2)
+        ad_chord = Line(a, d)
+        cb_chord = Line(c, b)
+        ac_side = Line(a, c)
+        db_side = Line(d, b)
+
+        notations = VGroup(
+            Tex('A').next_to(a, UP*.9+RIGHT*.1),
+            Tex('B').next_to(b, UP*-.9+RIGHT*.2),
+            Tex('C').next_to(c, UP*.9+RIGHT*-.2),
+            Tex('D').next_to(d, UP*-.9+RIGHT*-.1),
+            Tex('O').next_to(o, UP*.1+RIGHT*.9),
+
+            Tex('a').next_to(Line(o, a).get_center(), .5*(UP*-.1+RIGHT*.9)),
+            Tex('b').next_to(Line(o, d).get_center(), .5*(UP*.1+RIGHT*-.9)),
+            Tex('c').next_to(Line(o, c).get_center(), .5*(UP*-.1+RIGHT*-.9)),
+            Tex('d').next_to(Line(o, b).get_center(), .5*(RIGHT*1.2)),
+
+            Tex(r'$\alpha$', color=YELLOW).next_to(c, UP*-.22+RIGHT*.9).scale(.8),
+            Tex(r'$\alpha$', color=YELLOW).next_to(d, UP*.25+RIGHT*.75).scale(.8),
+            Tex(r'$\beta$', color=BLUE_B).next_to(a, UP*-.25+RIGHT*-.75).scale(.8),
+            Tex(r'$\beta$', color=BLUE_B).next_to(b, UP*.22+RIGHT*-.9).scale(.8),
+        )
+
+        #misc
+        c_arc = Sector(.6, 0, arc_center=c, start_angle=6.84*DEGREES, angle=-75.13*DEGREES, color=YELLOW, fill_opacity=.6)
+        d_arc = Sector(.6, 0, arc_center=d, start_angle=-5.45*DEGREES, angle=75.13*DEGREES, color=YELLOW, fill_opacity=.6)
+        a_arc = Sector(.6, 0, arc_center=a, start_angle=-110.32*DEGREES, angle=-62.84*DEGREES, color=BLUE_C, fill_opacity=.6)
+        b_arc = Sector(.6, 0, arc_center=b, start_angle=111.7*DEGREES, angle=62.84*DEGREES, color=BLUE_C, fill_opacity=.6)
+        
+        ab_arc = Arc(2.05, -78.33*DEGREES, 150.26*DEGREES, color=YELLOW, stroke_width=6)
+        cd_arc = Arc(2.05, -110.6*DEGREES, -125.7*DEGREES, color=YELLOW, stroke_width=6)
+
+        #eqs
+        eq_cd = MathTex(r'\angle C = \angle D, \quad \cup AB').move_to([0, -3.5, 0])
+        eq_ab = MathTex(r'\angle A = \angle B, \quad \cup CD').move_to([0, -4.5, 0])
+        rect = SurroundingRectangle(VGroup(eq_cd, eq_ab), color=BLUE_C)
+        similar_triangles = MathTex(r'\implies \triangle AOC \sim \triangle DOB').move_to([5, -4, 0])
+
+
+        self.wait(1)
+        self.play(Create(circle))
+        self.play(Create(ad_chord), Create(cb_chord), Write(notations[0:5]))
+        self.wait(2)
+        self.play(LaggedStart(
+            FadeIn(notations[5]),
+            FadeIn(notations[6]),
+            FadeIn(notations[7]),
+            FadeIn(notations[8]),
+            lag_ratio=0.15,
+            run_time=2
+        ))
+        self.wait(.25)
+        self.play(LaggedStart(
+            Create(ac_side),
+            Create(db_side),
+            lag_ratio=0.3,
+            run_time=1.2
+        ))
+        self.wait(.5)
+        self.play(GrowFromPoint(c_arc, c), GrowFromPoint(d_arc, d))
+        self.wait(.5)
+        self.play(Create(ab_arc))
+        self.wait(.5)
+        self.play(cam.animate.move_to([0, -1.4, 0]))
+        self.wait(.2)
+        self.play(Write(eq_cd))
+        self.wait(.25)
+        self.play(FadeOut(VGroup(c_arc, d_arc)), FadeIn(notations[9:11]))
+        self.wait(.75)
+        self.play(Uncreate(ab_arc), Create(cd_arc), Write(eq_ab), GrowFromPoint(a_arc, a), GrowFromPoint(b_arc, b))
+        self.wait(1)
+        self.play(FadeIn(notations[11:13]), ShrinkToCenter(a_arc), ShrinkToCenter(b_arc), Transform(cd_arc, rect)); rect = cd_arc
+        self.wait(1)
+        self.play(cam.animate.shift(RIGHT*4))
+        self.wait(.25)
+        self.play(Write(similar_triangles))
+        self.wait(1)
+
+
+        #separate triangles to make parallelogram
+        tr1 = Polygon(c, a, o) 
+        tr2 = Polygon(d, b, o) 
+
+        self.play(Transform(tr1, Polygon([0, 0, 0], [1.68, 0, 0], [.57, -2.16, 0], color=WHITE).move_to([5, 0, 0])))
+        self.wait(.2)
+        self.play(Transform(tr2, Polygon([0, 0, 0], [1.68*.76, 0, 0], [.57*.76, -2.16*.76, 0], color=WHITE).rotate(PI).move_to([7.5, 0, 0])))
+        self.wait(.25)
+
+        notation_tr12 = VGroup(
+            Tex('a').scale(.9).next_to(Line(tr1.get_vertices()[1], tr1.get_vertices()[2]).get_center(), .5*(DOWN*.6+RIGHT)),
+            Tex('c').scale(.9).next_to(Line(tr1.get_vertices()[0], tr1.get_vertices()[2]).get_center(), .5*(DOWN*.3+LEFT)),
+            Tex('b').scale(.9).next_to(Line(tr2.get_vertices()[0], tr2.get_vertices()[2]).get_center(), .5*(DOWN*-.3+RIGHT)),
+            Tex('d').scale(.9).next_to(Line(tr2.get_vertices()[1], tr2.get_vertices()[2]).get_center(), .5*(DOWN*-.6+LEFT)),
+        )
+        sectors = always_redraw(lambda:
+            VGroup(
+                Sector(.5, 0, arc_center=tr1.get_vertices()[0], start_angle=0, angle=-75.13*DEGREES, color=YELLOW, fill_opacity=.75),
+                Sector(.5, 0, arc_center=tr1.get_vertices()[1], start_angle=PI, angle=62.84*DEGREES, color=BLUE, fill_opacity=.75),
+                Sector(.5, 0, arc_center=tr2.get_vertices()[0], start_angle=PI, angle=-75.13*DEGREES, color=YELLOW, fill_opacity=.75),
+                Sector(.5, 0, arc_center=tr2.get_vertices()[1], start_angle=0, angle=62.84*DEGREES, color=BLUE, fill_opacity=.75),
+            )                 
+        )
+
+        eq = MathTex(r'ab = cd').scale(1.5).move_to([6.25, -3.5, 0])
+        eq_rect = SurroundingRectangle(eq, color=YELLOW, buff=.35)
+
+        
+        self.play(Write(notation_tr12), Create(sectors))
+        self.wait(1)
+        self.play(Indicate(tr1))
+        self.play(Flash(notation_tr12[3]))
+
+        self.play(Indicate(tr2))
+        self.play(Flash(notation_tr12[0]))
+        self.wait(1)
+
+        self.play(tr1.animate.scale(1.52), tr2.animate.scale(2), FadeOut(notation_tr12))
+        notation_tr12 = always_redraw(lambda: VGroup(
+            Tex('ad').scale(.9).next_to(Line(tr1.get_vertices()[1], tr1.get_vertices()[2]).get_center(), .5*(DOWN*.6+RIGHT)),
+            Tex('cd').scale(.9).next_to(Line(tr1.get_vertices()[0], tr1.get_vertices()[2]).get_center(), .5*(DOWN*.3+LEFT)),
+            Tex('ba').scale(.9).next_to(Line(tr2.get_vertices()[0], tr2.get_vertices()[2]).get_center(), .5*(DOWN*-.3+RIGHT)),
+            Tex('da').scale(.9).next_to(Line(tr2.get_vertices()[1], tr2.get_vertices()[2]).get_center(), .5*(DOWN*-.6+LEFT)),
+        ))
+        self.play(Write(notation_tr12))
+        self.wait(1.25)
+
+        self.play(Circumscribe(notation_tr12[0]), Circumscribe(notation_tr12[3]))
+        self.play(tr1.animate.shift([.8, 0, 0]), tr2.animate.shift([-.8, 0, 0]))
+        self.wait(1.25)
+        self.play(Flash(notation_tr12[1].get_center()), Flash(notation_tr12[2].get_center()))
+        self.play(similar_triangles.animate.shift(DOWN).set_opacity(0), GrowFromCenter(eq))
+        self.remove(similar_triangles)
+        self.wait(.25)
+        self.play(Create(eq_rect))
+        self.wait(.5)
+        self.play(cam.animate.move_to(ORIGIN).set_height(5.333), VGroup(eq, eq_rect).animate.scale(0.66).move_to([-3.25, 2, 0]), VGroup(tr1, tr2).animate.shift(RIGHT).set_opacity(0), VGroup(notation_tr12, sectors).animate.set_opacity(0), VGroup(eq_ab, eq_cd, rect).animate.set_opacity(0).shift(DOWN))
+        self.remove(tr1, tr2, notation_tr12, sectors, rect, eq_ab, eq_cd)
+        self.wait(.5)
+
+        braces = VGroup(
+            Brace(Line(o, a), Line(o, a).rotate(-PI/2).get_vector(), 0.025, 1, color=YELLOW),
+            Brace(Line(o, d), Line(o, d).rotate(-PI/2).get_vector(), 0.025, 1, color=YELLOW),
+            Brace(Line(o, b), Line(o, b).rotate(PI/2).get_vector(), 0.025, 1, color=BLUE),
+            Brace(Line(o, c), Line(o, c).rotate(PI/2).get_vector(), 0.025, 1, color=BLUE),
+        )
+
+        self.play(LaggedStart(
+            FadeIn(braces[0:2]),
+            FadeIn(braces[2:4]),
+            lag_ratio=.75,
+            run_time=1.5
+        ), notations[4].animate.set_opacity(.4),
+        notations[5].animate.shift(.5*(RIGHT*.6+UP*-.4)),
+        notations[6].animate.shift(.5*(RIGHT*-.6+UP*.4)),
+        notations[7].animate.shift(.5*(RIGHT*-.5+UP*-.35)),
+        notations[8].animate.shift(.5*(RIGHT*.5+UP*.35)),
+        )
+        self.wait(5)
+
+class Cosine_Law(MovingCameraScene):
+    def construct(self):
+        cam = self.camera.frame
+        circle = Circle(radius=3, color=GREEN)
+        dot = Dot(radius=.05)
+        
+        #dots
+        o = ORIGIN
+        cb_dot = [.55, 1.6, 0]
+        ac_dot = [-.98, -2.84, 0]
+        a_c_dot = [.98, 2.84, 0]
+        a_dot = [-3, 0, 0]
+        c_dot = [3, 0, 0]
+        b_dot = [-1.21, 2.75, 0]
+        #lines
+        a = Line(o, c_dot)
+        b = Line(c_dot, cb_dot)
+        c = Line(o, cb_dot)
+        ab = Line(a_dot, b_dot)
+        bc = Line(c_dot, b_dot)
+        ac = Line(c_dot, a_dot)
+        c_chord = Line(ac_dot, a_c_dot)
+
+        #notations
+        notations = VGroup(
+            Tex('a').next_to(a.get_center(), .5*DOWN),
+            Tex('b').next_to(b.get_center(), .5*(UP+RIGHT*.3)),
+            Tex('c').next_to(c.get_center(), .5*(UP*.25+LEFT)),
+            Tex(r'$\gamma$', color=BLUE).next_to(c_dot, (3*LEFT+UP*.4)),
+            Sector(.65, arc_center=c_dot, start_angle=PI, angle=-33.15*DEGREES, fill_opacity=.75, color=BLUE_D),
+
+
+            Tex('A').next_to(a_dot, LEFT),
+            Tex('B').next_to(b_dot, UP+LEFT*.2),
+            Tex('C').next_to(c_dot, RIGHT),
+            Square(.33, color=RED).align_to(b_dot, LEFT+UP).rotate(-33.15*DEGREES, about_point=b_dot).set_z_index(-2),
+            
+            Tex('a').next_to(Line(a_dot, o).get_center(), .5*DOWN),
+            Tex(r'2a$\cos$$\gamma$ - b').scale(0.7).rotate(Line(b_dot, c_dot).get_angle()).move_to(Line(b_dot, cb_dot).get_center() + Line(b_dot, cb_dot).rotate(-PI/2).get_vector()*.2),
+            Tex('a').next_to(Line(ac_dot, o).get_center(), .25*(.2*UP+LEFT*3.5)),
+            Tex('a-c').next_to(Line(cb_dot, a_c_dot).get_center(), .35*(-.2*UP+LEFT*-3.5)).scale(.85),
+        )
+
+        #misc
+        aa_brace = Brace(Line(a_dot, c_dot), DOWN, .1, .75)
+        aa_tex = Tex('2a').set_opacity(0)
+        bc_brace = Brace(Line(c_dot, b_dot), Line(c_dot, b_dot).rotate(-PI/2).get_vector(), .1, .75, color=YELLOW)
+        b_chord_brace = Brace(Line(b_dot, cb_dot), Line(b_dot, cb_dot).rotate(-PI/2).get_vector(), .025, .75, color=YELLOW)
+        c_chord_brace = Brace(Line(cb_dot, a_c_dot), Line(cb_dot, a_c_dot).rotate(-PI/2).get_vector(), .025, .25, color=YELLOW)
+        b_chord_hl = Line(b_dot, c_dot, color=RED, stroke_width=6).set_z_index(3)
+        c_chord_hl = Line(a_c_dot, ac_dot, color=RED, stroke_width=6).set_z_index(3)
+        ac_hl = Line(ac_dot, cb_dot, color=YELLOW, stroke_width=10).set_z_index(4)
+        a_c_hl = Line(cb_dot, a_c_dot, color=YELLOW, stroke_width=10).set_z_index(4)
+        cos_hl = Line(b_dot, cb_dot, color=YELLOW, stroke_width=10).set_z_index(4)
+        b_hl = Line(cb_dot, c_dot, color=YELLOW, stroke_width=10).set_z_index(4)
+        label = Text('Теормеа косинусов').move_to([6.5, -1.5, 0])
+
+
+        #eqs 
+        eq_bc = MathTex(r'\cos\gamma =', r'\frac{BC}{2a}').move_to([-6, 1.5, 0]).scale(1.25); eq_bc[0][3].set_color(BLUE_C)
+        eq_bc_target = MathTex(r'BC = 2a\cos\gamma').move_to([-6, 1.5, 0]).scale(1.25); eq_bc_target[0][8].set_color(BLUE_C)
+        eq_1 = MathTex('(a+c)', r'(a-c) \\', '= b', r'(2a\cos\gamma - b)').move_to([6.5, 0, 0])
+        eq_2 = MathTex(r'c^2 = a^2 + b^2 - 2ab\cos\gamma').move_to([6.5, 1.5, 0])
+        rect = SurroundingRectangle(eq_2, YELLOW, 0.5)
+
+
+        self.wait(1)
+        self.play(Create(circle), Create(dot))
+        self.wait(.75)
+        self.play(Create(VGroup(a, b, c)), Write(notations[0:3]))
+        self.wait(1)
+        self.play(Indicate(notations[0]))
+        self.play(Flash(c_dot), GrowFromPoint(notations[4], c_dot))
+        self.play(Write(notations[3]))
+        self.wait(.8)
+
+        self.play(Create(ac), Create(bc), Write(notations[9]))
+        self.wait(.2)
+        self.play(Create(ab), Flash(a_dot), Flash(b_dot), Write(notations[5:8]))
+        self.wait(1.5)
+        self.play(GrowFromPoint(notations[8], b_dot), Flash(b_dot))
+        self.wait(.5)
+        self.play(FadeIn(aa_brace), notations[0].animate.shift(DOWN*.3), notations[9].animate.shift(DOWN*.3))
+        self.wait(1.25)
+        self.play(aa_tex.animate.shift(DOWN*.66).set_opacity(1))
+        self.wait(.5)
+        self.play(FadeOut(aa_brace), aa_tex.animate.shift(RIGHT).set_opacity(0), VGroup(notations[0], notations[9]).animate.shift(UP*.3), cam.animate.move_to([-2, 0, 0])); self.remove(aa_tex)
+        self.wait(1)
+
+        self.play(Write(eq_bc[0]))
+        self.play(ShowPassingFlash(Polygon(a_dot, b_dot, c_dot, color=YELLOW, stroke_width=8), time_width=.9), run_time=1.5)
+        self.wait(.75)
+        self.play(Write(eq_bc[1]))
+        self.wait(.25)
+        self.play(FadeIn(bc_brace))
+        self.wait(.4)
+        self.play(ShowPassingFlash(Line(a_dot, c_dot, color=YELLOW, stroke_width=10), time_width=.8), run_time=1.5)
+        self.wait(1)
+        self.play(TransformMatchingShapes(eq_bc, eq_bc_target), FadeOut(bc_brace))
+        self.wait(2)
+
+        self.play(FadeIn(b_chord_brace))
+        self.wait(.25)
+        self.play(Write(notations[10]))
+        self.wait(2.5)
+        self.play(Create(c_chord), FadeOut(b_chord_brace), notations[10].animate.shift(Line(b_dot, cb_dot).rotate(-PI/2).get_vector()*-.05), cam.animate.move_to(ORIGIN), FadeOut(eq_bc_target))
+        self.wait(1.75)
+        self.play(ShowPassingFlash(Line(ac_dot, o, color=YELLOW, stroke_width=10), time_width=1.5), Write(notations[11]), run_time=1.5)
+        self.wait(.75)
+        self.play(FadeIn(c_chord_brace))
+        self.wait(.2)
+        self.play(Write(notations[12]))
+        self.wait(.2)
+        self.play(FadeOut(c_chord_brace), notations[12].animate.shift(LEFT*.2))
+        self.wait(1.25)
+        self.play(cam.animate.shift(RIGHT*3))
+        self.wait(.5)
+        self.play(Create(VGroup(b_chord_hl, c_chord_hl)))
+        self.wait(1.8)
+        self.play(FadeIn(ac_hl), Write(eq_1[0]))
+        self.wait(.3)
+        self.play(FadeIn(a_c_hl), Write(eq_1[1]), FadeOut(ac_hl))
+        self.wait(.2)
+        self.play(FadeIn(b_hl), Write(eq_1[2]), FadeOut(a_c_hl))
+        self.play(FadeIn(cos_hl), Write(eq_1[3]), FadeOut(b_hl), run_time=3)
+        self.wait(1.5)
+        self.play(TransformMatchingShapes(eq_1, eq_2), FadeOut(cos_hl))
+        self.wait(1.5)
+        self.play(Create(rect))
+        self.play(Write(label), run_time=1.75)
+        self.wait(1.25)
+        self.play(FadeOut(VGroup(a, b, circle, dot, notations, ac, ab, bc, c_chord, c, b_chord_hl, c_chord_hl, label, rect)), cam.animate.move_to(ORIGIN), eq_2.animate.move_to([0, -2.5, 0]))
+        self.wait(.25)
+
+
+        triangle = Polygon([0, 0, 0], [3, -3, 0], [7, -3, 0]).move_to([0, 0, 0])
+        p = triangle.get_vertices()
+        a = Tex('a', color=YELLOW).next_to(Line(p[0], p[1]).get_center(), .5*(DOWN+LEFT))
+        b = Tex('b', color=YELLOW).next_to(Line(p[1], p[2]).get_center(), .5*(UP))
+        c = Tex('c').next_to(Line(p[0], p[2]).get_center(), .5*(UP+RIGHT*.5))
+        g = Sector(.5, color=YELLOW, fill_opacity=.6, arc_center=p[1], angle=135*DEGREES)
+        a_side = Line(p[0], p[1], color=YELLOW, stroke_width=7.5).set_z_index(3)
+        b_side = Line(p[1], p[2], color=YELLOW, stroke_width=7.5).set_z_index(3)
+        eq = MathTex(r'c = \sqrt{a^2 + b^2 - 2ab\cos\gamma}').set_opacity(0).move_to([0, 1, 0])
+        eq[0][4].set_color(YELLOW)
+        eq[0][7].set_color(YELLOW)
+        eq[0][11].set_color(YELLOW)
+        eq[0][12].set_color(YELLOW)
+        eq[0][16].set_color(YELLOW)
+
+
+        self.play(Create(triangle), Write(c))
+        self.wait(.2)
+        self.play(Create(a_side), Create(b_side), Write(a), Write(b))
+        self.wait(.15)
+        self.play(Create(g))
+        self.wait(.15)
+        self.play(eq.animate.set_opacity(1).move_to([0, 2.5, 0]))
+        self.wait(1.5)
+        self.play(LaggedStart(VGroup(triangle, a, b, c, a_side, b_side, g).animate.shift(RIGHT*3).set_opacity(0), eq.animate.shift(LEFT*3).set_opacity(0), eq_2.animate.shift(LEFT*3).set_opacity(0), lag_ratio=0.3))
+        self.wait(3)
+
+
