@@ -2777,4 +2777,94 @@ class Cosine_Law(MovingCameraScene):
         self.play(LaggedStart(VGroup(triangle, a, b, c, a_side, b_side, g).animate.shift(RIGHT*3).set_opacity(0), eq.animate.shift(LEFT*3).set_opacity(0), eq_2.animate.shift(LEFT*3).set_opacity(0), lag_ratio=0.3))
         self.wait(3)
 
+class Sine_Area(MovingCameraScene):
+    def construct(self):
+        cam = self.camera.frame
+        # cam.move_to([3, 2, 0])
+        g = ValueTracker(1)
+        fig = always_redraw(lambda: VGroup(
+            Line(ORIGIN, RIGHT*4).rotate(g.get_value(), about_point=ORIGIN),
+            Line(ORIGIN, RIGHT*5)
+        ))
+        fig_mir = always_redraw(lambda: VGroup(
+            Line(fig[1].get_points()[3], fig[0].get_points()[3] + RIGHT*5),
+            Line(fig[0].get_points()[3], fig[0].get_points()[3] + RIGHT*5)
+        ))
+        h = always_redraw(lambda: Line(
+            fig[0].get_points()[3], [fig[0].get_points()[3][0], 0, 0]
+        ).set_opacity(.5))
+        fill = always_redraw(lambda: Polygon(
+            ORIGIN, fig[0].get_points()[3], fig_mir[1].get_points()[3], fig[1].get_points()[3], color=YELLOW, fill_opacity=.5
+        ).set_z_index(-3))
 
+        notations = VGroup(
+            always_redraw(lambda: Tex('a').next_to(fig[1].get_center(), DOWN*.7)),
+            always_redraw(lambda: Tex('b').next_to(fig[0].get_center(), UP*np.cos(g.get_value())+LEFT*np.sin(g.get_value()))),
+            always_redraw(lambda: Tex('h').next_to(h, RIGHT*.7)),
+
+            always_redraw(lambda: Sector(.75, color=BLUE_C, fill_opacity=.75, angle=g.get_value())),
+            always_redraw(lambda: Tex(r'$\gamma$').move_to(RIGHT*np.cos(g.get_value()/2)+UP*np.sin(g.get_value()/2)))
+        )
+
+
+        #misc
+        label = Text('Площадь')
+        triangle_hl = Polygon(ORIGIN, fig[0].get_points()[3], [fig[0].get_points()[3][0], 0, 0], color=YELLOW, stroke_width=7.5).set_z_index(3)
+
+        #eqs 
+        eq_area = MathTex(r'S = ah').move_to([3.5, 5, 0]).scale(1.25)
+        eq_h = MathTex('h', r'= \sin\gamma \cdot b').move_to([-3, 2, 0]).scale(1.25)
+        eq_general = MathTex(r'S = ab \sin\gamma').move_to([3.75, 5, 0]).scale(1.25)
+        eq_triangle = MathTex(r'S_\triangle = \frac{1}{2} ab \sin\gamma').move_to([3.75, 3.5, 0]).scale(1.25)
+
+
+        self.wait()
+        self.play(GrowFromCenter(label))
+        self.wait(.75)
+        self.play(label.animate.shift(DOWN).set_opacity(0)); self.remove(label)
+        self.wait(.5)
+
+        cam.move_to(VGroup(fig, fig_mir).get_center())
+        self.play(Create(fig), Create(fig_mir), Write(notations[0:2]))
+        self.wait(.25)
+        self.play(cam.animate.shift(UP*1.25), Create(h), Write(notations[2]))
+        self.wait(.25)
+        self.play(Write(eq_area))
+        self.play(Circumscribe(eq_area, fade_out=True), run_time=1.25)
+        self.wait(.2)
+        self.play(Create(notations[3]))
+        self.play(Write(notations[4]))
+
+        self.wait(.2)
+        self.play(cam.animate.shift(LEFT*2.5))
+        self.wait(.2)
+        self.play(Write(eq_h[0]), Create(triangle_hl))
+        self.wait(.5)
+        self.play(Write(eq_h[1]), Uncreate(triangle_hl), run_time=2)
+        self.wait(1.25)
+
+        self.play(Flash(eq_area[0][3].get_center()))
+        self.play(TransformMatchingShapes(VGroup(eq_area, eq_h), eq_general), cam.animate.shift(RIGHT*2.5))
+        self.wait(1.5)
+        self.play(DrawBorderThenFill(fill), eq_general.animate.move_to([3.75, -1.75, 0]), cam.animate.shift(DOWN*2))
+        self.wait(.1)
+
+        self.play(g.animate.set_value(PI/2))
+        self.wait(3)
+        unit = Tex('1', color=YELLOW).move_to(eq_general[0][5].get_center()).set_opacity(0)
+        self.play(unit.animate.shift(UP*.5).set_opacity(1))
+        self.wait(.75)
+
+        self.play(g.animate.set_value(0.5), FadeOut(unit), run_time=1.5)
+        self.wait(2)
+        diagonal = Line(fig[0].get_points()[3], fig[1].get_points()[3])
+        fill2 =  Polygon(ORIGIN, fig[0].get_points()[3], fig[1].get_points()[3], color=YELLOW, fill_opacity=.5).set_z_index(-3)
+        self.play(FadeIn(fill2), FadeOut(fill), Create(diagonal))
+        self.play(Write(eq_triangle))
+        self.wait(3)
+        self.play(eq_triangle.animate.shift(LEFT).set_opacity(0), eq_general.animate.shift(LEFT).set_opacity(0), VGroup(fig, fig_mir, notations, h, diagonal, fill2).animate.shift(RIGHT).set_opacity(0))
+        
+        
+
+
+        
