@@ -2864,7 +2864,161 @@ class Sine_Area(MovingCameraScene):
         self.wait(3)
         self.play(eq_triangle.animate.shift(LEFT).set_opacity(0), eq_general.animate.shift(LEFT).set_opacity(0), VGroup(fig, fig_mir, notations, h, diagonal, fill2).animate.shift(RIGHT).set_opacity(0))
         
-        
+class Heron(MovingCameraScene):
+    def construct(self):
+        cam = self.camera.frame
+
+        triangle = Polygon([0, 0, 0], [1.5, 2, 0], [4.5, 0, 0], color=WHITE)
+        d1, d2, d3 = triangle.get_vertices()
+        h_point = [d2[0], 0, 0]
+        h = Line(d2, h_point).set_opacity(.6)
+        a, b, c = Line(d1, d2), Line(d1, d3), Line(d2, d3)
+
+        a_tex = Tex('a', color=RED).next_to(a.get_center(), .5*(LEFT+UP))
+        b_tex = Tex('b', color=GREEN).next_to(b.get_center(), .5*(DOWN))
+        b1_tex = MathTex('b_1', color=YELLOW).next_to(Line(d1, h_point).get_center(), .35*(UP)).scale(.9)
+        b2_tex = MathTex('b_2', color=YELLOW).next_to(Line(h_point, d3).get_center(), .35*(UP)).scale(.9)
+        c_tex = Tex('c', color=BLUE).next_to(c.get_center(), .5*(-LEFT+UP))
+        h_tex = Tex('h').next_to(h.get_center(), .5*(RIGHT))
+
+        #misc
+        label = Text('Формула Герона')
+        fill = Polygon([0, 0, 0], [1.5, 2, 0], [4.5, 0, 0], color=YELLOW, fill_opacity=.66).set_z_index(-1)
+        tr_hl = Polygon(d1, d2, h_point, color=YELLOW).set_z_index(1)
+
+        #equations
+        eq_area = MathTex(r'S = \frac{1}{2}bh').scale(1.25).move_to([1.75, 3.35, 0])
+        h_in_terms = MathTex(r'h = x{{a}}^k + y{{b}}^l + z{{c}}^m').move_to([9, 1, 0]).set_color_by_tex_to_color_map({'a': RED, 'b': GREEN, 'c': BLUE}).scale(1.2)
+        eq_b1 = MathTex(
+            r'{b_1}^2 + h^2 = a^2', 
+            r'\\{b_2}^2 + h^2 = c^2', 
+            r'\\{b_1}^2 - {b_2}^2 = a^2 - c^2',
+            r'\\(b_1 - b_2)(b_1 + b_2) = a^2 - c^2\\',
+            r'b_1 - b_2 = \frac{a^2 - c^2}{b}\\',
+            r'b_1 + b_2 = b',
+            r'\\2b_1 = \frac{a^2 - c^2}{b} + b'
+        ).move_to([8.5, 1, 0])
+        eq_b1_done = MathTex(r'b_1 = \frac{a^2 + b^2 - c^2}{2b}').move_to(eq_b1[6].get_center()).set_opacity(0)
+        eq_b1_done[0][0].set_color(YELLOW)
+        eq_b1_done[0][3].set_color(RED)
+        eq_b1_done[0][6].set_color(GREEN)
+        eq_b1_done[0][9].set_color(BLUE)
+        eq_b1_done[0][13].set_color(GREEN)
+        eq_area_expanded = MathTex(
+            r'S = \frac{1}{2}bh \\',
+            r'S = \frac{1}{2}b\sqrt{a^2 - {b_1}^2} \\',
+            r'S = \frac{1}{2}b\sqrt{a^2 - \left(\frac{a^2 + b^2 - c^2}{2b}\right)^2} \\'
+        ).move_to([8.5, 1, 0])
+        eq_area_simplification = MathTex(r'S = \frac{1}{2}b\sqrt{a^2 - \left(\frac{a^2 + b^2 - c^2}{2b}\right)^2}').move_to([6, -2.5, 0])
 
 
+        brace_diff = Brace(eq_b1[0:2], LEFT, 0.25, 1)
+        minus = Tex('—').next_to(brace_diff.get_center(), LEFT)
+        brace_b1b2 = Brace(eq_b1[2][0:6], DOWN, color=YELLOW, sharpness=1)
+        brace_b = Brace(eq_b1[3][7:13], DOWN, color=YELLOW, sharpness=1, buff=.1)
+        brace_b_tex = Tex('b').next_to(brace_b.get_center(), DOWN*.6)
+        brace_sum = Brace(eq_b1[4:6], LEFT, 0.25, 1)
+        plus = Tex('+').next_to(brace_sum.get_center(), LEFT)
+        brace_h = Brace(eq_area_expanded[1][6:14], DOWN, color=YELLOW, sharpness=1)
+        tr2_hl = Polygon(d1, d2, h_point, color=YELLOW, stroke_width=7.5).set_z_index(2)
         
+
+        self.wait()
+        self.play(Write(label))
+        self.wait(.5)
+        self.play(ShrinkToCenter(label))
+        self.wait(.5)
+        cam.move_to(triangle.get_center())
+
+        self.play(Create(triangle))
+        self.wait(1.25)
+        self.play(Write(VGroup(a_tex, b_tex, c_tex)))
+        self.wait(.35)
+        self.play(Write(eq_area), Create(h), Write(h_tex), DrawBorderThenFill(fill))
+        self.wait(1)
+        self.play(cam.animate.shift(RIGHT*4), FadeOut(fill))
+        self.wait(1.1) 
+        self.play(Write(h_in_terms))
+        self.wait(1.75) 
+        
+        self.play(h_in_terms.animate.shift(DOWN).set_opacity(0)); self.remove(h_in_terms)
+        self.wait(.25) 
+        self.play(FadeIn(VGroup(b1_tex, b2_tex)))
+        self.wait(1)
+        self.play(Create(tr_hl))
+        self.wait(.2) 
+        self.play(Transform(tr_hl, Polygon(d3, d2, h_point, color=YELLOW).set_z_index(1)))
+        self.play(Write(eq_b1[0:2]), FadeOut(tr_hl))
+        self.wait(.5)
+        self.play(Flash(eq_b1[0][4].get_center()), Flash(eq_b1[1][4].get_center())) 
+        self.play(FadeIn(VGroup(brace_diff, minus)))
+        self.wait(1)
+        self.play(Write(eq_b1[2]))
+        self.wait(2.75)
+        
+        self.play(FadeIn(brace_b1b2))
+        self.wait(.25)
+        self.play(Write(eq_b1[3]), FadeOut(brace_b1b2))
+        self.wait(1)
+        self.play(FadeIn(VGroup(brace_b, brace_b_tex)))
+        self.wait(1.5)
+        self.play(Write(eq_b1[4]), FadeOut(VGroup(brace_b, brace_b_tex)))
+        self.wait(1)
+        
+        self.play(Flash(eq_b1[4][3].get_center()))
+        self.wait(.5)
+        self.play(FadeIn(VGroup(brace_sum, plus)))
+        self.wait(.25)
+        self.play(Write(eq_b1[5]))
+        self.wait(.75)
+        self.play(Write(eq_b1[6]))
+        self.wait(1.5)
+        self.play(eq_b1_done.animate.set_opacity(1).shift(LEFT*7).scale(.9), run_time=1.5)
+        self.wait(1.5)
+        self.play(Circumscribe(eq_b1_done, fade_out=True))
+        self.wait(1.25)
+        self.play(Unwrite(eq_b1), FadeOut(VGroup(brace_diff, brace_sum, minus, plus)), TransformMatchingShapes(eq_area, eq_area_expanded[0]), run_time=1.25)
+        self.wait(.5)
+
+        self.play(Write(eq_area_expanded[1]), run_time=1.5)
+        self.wait(1.5)
+        self.play(FadeIn(brace_h), Create(tr2_hl))
+        self.wait(2.5)
+        self.play(FadeOut(tr2_hl), Transform(brace_h, Brace(eq_area_expanded[1][11:14], DOWN, color=YELLOW, sharpness=1)))
+        self.play(Indicate(eq_b1_done))
+        self.wait(.5)
+        self.play(GrowFromCenter(eq_area_expanded[2]), FadeOut(brace_h))
+        self.wait(5)
+
+        step1 = MathTex(r'S = \frac{1}{2}b \sqrt{\frac{1}{4b^2}\left((2ab)^2 - (a^2 + b^2 - c^2)^2\right)}').move_to([6, -2.5, 0])
+        step2 = MathTex(r'S = \sqrt{\frac{1}{16} \left(2ab - (a^2 + b^2 - c^2)\right)\left(2ab + (a^2 + b^2 - c^2)\right)}').move_to([6, -2.5, 0])
+        step3 = MathTex(r'S = \sqrt{\frac{(c - (a - b))}{2} \frac{(c + (a - b))}{2} \frac{((a + b) - c)}{2} \frac{((a - b) + c}{2}}').move_to([6, -2.5, 0])
+        last_step = MathTex(r'S = \sqrt{p(p-a)(p-b)(p-c)}').move_to([6, -2.5, 0])
+        last_step[0][8].set_color(RED)
+        last_step[0][13].set_color(GREEN)
+        last_step[0][18].set_color(BLUE)
+        
+        self.play(eq_b1_done.animate.move_to([8.6, 1, 0]), cam.animate.shift(DOWN*2.5), TransformMatchingShapes(eq_area_expanded, eq_area_simplification))
+        self.wait(.2)
+        self.play(TransformMatchingShapes(eq_area_simplification, step1), run_time=.5)
+        self.wait(1.5)
+        self.play(TransformMatchingShapes(step1, step2), run_time=.75)
+        self.wait(1.5)
+        self.play(TransformMatchingShapes(step2, step3), run_time=.75)
+        self.wait(1.5)
+        self.play(TransformMatchingShapes(step3, last_step), run_time=.75)
+        self.wait(1.5)
+
+        self.play(cam.animate.move_to(triangle.get_center()+UP), last_step.animate.move_to([4.5/2, 3.25, 0]), eq_b1_done.animate.shift(RIGHT).set_opacity(0))
+        self.wait(5)
+        self.play(last_step.animate.shift(UP).set_opacity(0), VGroup(triangle, a_tex, b_tex, c_tex, h_tex, b1_tex, b2_tex, h).animate.shift(DOWN).set_opacity(0))
+
+class Outro(Scene):
+    def construct(self):
+        av = ImageMobject('E:\Ремесло\Изображения\аватарки\я2', 7500)
+
+        
+        self.add(av)
+        self.wait()
+        self.play(Circumscribe(av), run_time=3)
+        self.wait(2)
