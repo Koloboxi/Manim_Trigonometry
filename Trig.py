@@ -8,6 +8,15 @@ config.max_files_cached = -1
 # config.frame_width = 3.555
 # config.frame_height = 2
  
+class Intro(Scene):
+    def construct(self):
+        t = Text('Тригонометрия')
+        self.wait()
+        self.play(Write(t))
+        self.wait()
+        self.play(t.animate.shift(DOWN).set_opacity(0))
+
+
 class CongruentTriangles(Scene):
     def construct(self):
         triangle = Polygon(
