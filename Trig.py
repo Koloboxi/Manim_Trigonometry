@@ -16,6 +16,18 @@ class Intro(Scene):
         self.wait()
         self.play(t.animate.shift(DOWN).set_opacity(0))
 
+class Intro_waves(Scene):
+    def construct(self):
+        ax = Axes()
+        a = ValueTracker(1)
+        b = ValueTracker(0)
+
+        plot = always_redraw(lambda: ax.plot(lambda x: np.sin(x*a.get_value())-(np.cos(x*b.get_value())), color=RED))
+
+        self.add(plot)
+        self.wait()
+        self.play(a.animate.set_value(.5), b.animate.set_value(2))
+        self.wait()
 
 class CongruentTriangles(Scene):
     def construct(self):
